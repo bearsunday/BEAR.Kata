@@ -100,7 +100,7 @@ variation that demonstrates `BEAR.Streamer` without changing canonical
 | `AdminUserInterface` | Authenticated admin identity carrying author ownership; enforced in `Page/Admin/*` through `AdminGuard` |
 | Practical Google guide | `docs/auth-google.md` / `docs/ja/auth-google.md` show OAuth client setup, `.env`, callback, identity mapping, logout, and env-gated authorization URL smoke |
 
-Note: `Page/Admin/*` is now behind an `AdminGuard` check backed by `UserInterface` / `AdminUserInterface`, with CSRF protection on admin form posts via the `Ray\Csrf` `#[SameOrigin]` + `#[CsrfToken]` interceptors.
+Note: `Page/Admin/*` is now behind an `AdminGuard` check backed by `UserInterface` / `AdminUserInterface`, with CSRF protection on admin form posts via the `BEAR\Csrf` `#[SameOrigin]` + `#[CsrfToken]` interceptors.
 
 ### Persistence & migrations
 

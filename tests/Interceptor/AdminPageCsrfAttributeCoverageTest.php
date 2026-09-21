@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace BEAR\Kata\Interceptor;
 
+use BEAR\Csrf\Attribute\CsrfToken;
+use BEAR\Csrf\Attribute\SameOrigin;
 use PHPUnit\Framework\TestCase;
-use Ray\Csrf\Attribute\CsrfToken;
-use Ray\Csrf\Attribute\SameOrigin;
 use ReflectionAttribute;
 use ReflectionClass;
 use ReflectionMethod;

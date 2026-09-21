@@ -11,13 +11,13 @@ The choreography comes from
 Confirmation / CSRF strategy) and the Codex review pass that followed.
 
 **Status: 実装はこのrepositoryを離れた。** ここに記録された設計は
-[`ray/csrf`](https://github.com/ray-di/Ray.Csrf) として切り出され、`src-csrf/` は削除された。
+[`bear/csrf`](https://github.com/bearsunday/BEAR.Csrf) として切り出され、`src-csrf/` は削除された。
 以下で `src-csrf/` を指す記述は、インキュベーション期間の設計史として読むこと。
 package 化にあたり、application統合で見つかった4件の欠陥
-([#4](https://github.com/ray-di/Ray.Csrf/issues/4) /
-[#5](https://github.com/ray-di/Ray.Csrf/issues/5) /
-[#6](https://github.com/ray-di/Ray.Csrf/issues/6) /
-[#7](https://github.com/ray-di/Ray.Csrf/issues/7)) を修正した。#7 は未解決で、
+([#4](https://github.com/bearsunday/BEAR.Csrf/issues/4) /
+[#5](https://github.com/bearsunday/BEAR.Csrf/issues/5) /
+[#6](https://github.com/bearsunday/BEAR.Csrf/issues/6) /
+[#7](https://github.com/bearsunday/BEAR.Csrf/issues/7)) を修正した。#7 は未解決で、
 同梱 store は coroutine host で例外を投げて拒否する。
 
 ---
@@ -66,7 +66,7 @@ read as a defence implementation detail.
 
 ### Wiring
 
-`CsrfModule` (`src-csrf/CsrfModule.php`, namespace `Ray\Csrf`) binds
+`CsrfModule` (`src-csrf/CsrfModule.php`, namespace `BEAR\Csrf`) binds
 both interceptor pointcuts and the typed value classes they depend
 on (`AllowedOrigin`, `CsrfTokenField`). `AppModule` installs the
 module after the auth bindings, passing the operator-controlled
@@ -83,7 +83,7 @@ sides and obscure that they're different concerns.
 
 The library lives in `src-csrf/` as an upstream-candidate package —
 see `src-csrf/README.md` for the donation plan. Consumer `use`
-statements already address `Ray\Csrf\` so the namespace is the
+statements already address `BEAR\Csrf\` so the namespace is the
 migration contract.
 
 ### Detection algorithm
@@ -180,7 +180,7 @@ methods and would have broken every internal use of those resources.
   `tests-csrf/Http/CsrfTokenFieldTest`,
   `tests-csrf/Exception/ForbiddenExceptionTest`** — pure value-class
   / exception unit tests on the library surface. Migrate alongside
-  the source when `ray/csrf-module` ships.
+  the source when `bear/csrf-module` ships.
 - **`tests/Interceptor/SameOriginInterceptorTest`** — 18 cases over
   the algorithm: allowed-origin null short-circuit, every
   `Sec-Fetch-Site` literal (including the explicit reject for
@@ -205,12 +205,12 @@ binding before CI does.
 
 ## Library packaging
 
-`src-csrf/` (namespace `Ray\Csrf`) and its companion `tests-csrf/`
+`src-csrf/` (namespace `BEAR\Csrf`) and its companion `tests-csrf/`
 hold the CSRF stack as a self-contained upstream candidate. Nothing
 in `src-csrf/` references `BEAR\Kata` — the library depends only
 on `ray/aop`, `ray/di`, and `bear/resource`.
 
-When `ray/csrf-module` is published (target: koriym/ray.csrf or
+When `bear/csrf-module` is published (target: koriym/ray.csrf or
 similar Ray.* vendor), migration is:
 
 1. Delete `src-csrf/` and `tests-csrf/`.
@@ -220,10 +220,10 @@ similar Ray.* vendor), migration is:
    `psalm.xml`, the `phpmd` composer script, and the PHPUnit
    `<source>` section. Drop the `csrf` testsuite from
    `phpunit.xml.dist`.
-4. Add `ray/csrf-module` to `composer.json` `require`.
+4. Add `bear/csrf-module` to `composer.json` `require`.
 5. Clear the DI cache: `rm -rf var/tmp/*-hal-app var/tmp/*-hal-api-app`.
 
-Consumer `use` statements (already addressing `Ray\Csrf\…`) stay
+Consumer `use` statements (already addressing `BEAR\Csrf\…`) stay
 unchanged. See `src-csrf/README.md` for the surface and rationale.
 
 ---
@@ -237,6 +237,6 @@ unchanged. See `src-csrf/README.md` for the surface and rationale.
   error pipeline. The interceptor throws `ForbiddenException`; the
   default error pipeline turns that into a 4xx response. A polished
   HTML 403 page belongs with the broader Page-layer error UX work.
-- Extracting the interceptor into a `ray/csrf-module` package. Per
+- Extracting the interceptor into a `bear/csrf-module` package. Per
   the Codex review, package extraction waits until the in-app
   shape settles.

@@ -12,7 +12,7 @@ use RuntimeException;
  * Raised at boot rather than tolerated, because the alternative is the gate standing down for
  * every request with nothing in the logs to say so. A deployment that genuinely wants no origin
  * check says so in its own context module by installing
- * {@see \Ray\Csrf\CsrfModule::withoutSameOriginCheck()}.
+ * {@see \BEAR\Csrf\CsrfModule::withoutSameOriginCheck()}.
  */
 final class MissingAllowedOriginException extends RuntimeException
 {

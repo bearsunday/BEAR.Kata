@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace BEAR\Kata\Renderer;
 
+use BEAR\Csrf\CsrfTokenInterface;
+use BEAR\Csrf\Http\CsrfTokenField;
 use BEAR\Kata\Auth\AuthSessionInterface;
 use BEAR\Kata\Auth\UserInterface;
 use BEAR\Kata\Renderer\Exception\InvalidResourcePathException;
@@ -14,8 +16,6 @@ use ErrorException;
 use Override;
 use Qiq\Template;
 use Ray\Aop\WeavedInterface;
-use Ray\Csrf\CsrfTokenInterface;
-use Ray\Csrf\Http\CsrfTokenField;
 use ReflectionClass;
 use Throwable;
 

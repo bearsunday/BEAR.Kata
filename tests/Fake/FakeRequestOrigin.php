@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace BEAR\Kata\Fake;
 
+use BEAR\Csrf\Http\RequestOriginInterface;
 use Override;
-use Ray\Csrf\Http\RequestOriginInterface;
 
 final readonly class FakeRequestOrigin implements RequestOriginInterface
 {

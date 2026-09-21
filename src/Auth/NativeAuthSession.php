@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace BEAR\Kata\Auth;
 
-use Ray\Csrf\CsrfTokenInterface;
+use BEAR\Csrf\CsrfTokenInterface;
 
 use function bin2hex;
 use function hash_equals;

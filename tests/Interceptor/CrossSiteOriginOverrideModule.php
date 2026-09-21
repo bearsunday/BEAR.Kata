@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace BEAR\Kata\Interceptor;
 
+use BEAR\Csrf\Http\AllowedOrigin;
+use BEAR\Csrf\Http\RequestOriginInterface;
 use BEAR\Kata\Fake\FakeRequestOrigin;
 use Override;
-use Ray\Csrf\Http\AllowedOrigin;
-use Ray\Csrf\Http\RequestOriginInterface;
 use Ray\Di\AbstractModule;
 
 /**

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace BEAR\Kata\Resource\Page\Admin;
 
+use BEAR\Csrf\Attribute\CsrfToken;
+use BEAR\Csrf\Attribute\SameOrigin;
 use BEAR\Kata\Auth\AdminGuard;
 use BEAR\Kata\Auth\AdminUserInterface;
 use BEAR\Kata\Entity\Article;
@@ -14,8 +16,6 @@ use BEAR\Kata\Query\TagQueryInterface;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
 use BEAR\Resource\ResourceObject;
-use Ray\Csrf\Attribute\CsrfToken;
-use Ray\Csrf\Attribute\SameOrigin;
 
 use function is_array;
 

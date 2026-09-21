@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace BEAR\Kata\Module;
 
 use Auth0\SDK\Contract\Auth0Interface;
+use BEAR\Csrf\CsrfModule;
 use BEAR\Kata\Auth\AdminGuard;
 use BEAR\Kata\Auth\AdminUserInterface;
 use BEAR\Kata\Auth\Auth0AuthProvider;
@@ -33,7 +34,6 @@ use Koriym\EnvJson\EnvJson;
 use League\CommonMark\CommonMarkConverter;
 use League\OAuth2\Client\Provider\Google;
 use Ray\AuraSqlModule\AuraSqlModule;
-use Ray\Csrf\CsrfModule;
 use Ray\Di\Scope;
 use Ray\MediaQuery\MediaQuerySqlModule;
 
