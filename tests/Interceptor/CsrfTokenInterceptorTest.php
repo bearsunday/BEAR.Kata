@@ -8,8 +8,8 @@ use BEAR\Kata\Fake\FakeCsrfToken;
 use BEAR\Kata\Fake\FakeRequestBodyToken;
 use PHPUnit\Framework\TestCase;
 use Ray\Aop\ReflectiveMethodInvocation;
+use Ray\Csrf\CsrfTokenInterface;
 use Ray\Csrf\Exception\ForbiddenException;
-use Ray\Csrf\Http\AllowedOrigin;
 use Ray\Csrf\Interceptor\CsrfTokenInterceptor;
 
 /**
@@ -20,18 +20,46 @@ final class CsrfTokenInterceptorTest extends TestCase
 {
     public const string PROCEED_SENTINEL = 'proceeded';
 
-    private const string ALLOWED_ORIGIN = 'https://cms.example.com';
-
-    public function testAllowedOriginNullShortCircuits(): void
+    public function testTokenGateDoesNotDependOnOriginConfiguration(): void
     {
-        // Mirrors SameOriginInterceptor's short-circuit — same on/off knob
-        // means dev / CLI / test environments skip the gate even with a
-        // missing or mismatched token in the body.
+        // The two gates are independent defences. This used to short-circuit whenever no
+        // allowed origin was configured, which meant one unset environment variable disabled
+        // token checking as well — the deployment with the weakest configuration got the
+        // weakest protection, silently. Whether an origin is configured is now the
+        // same-origin gate's business alone; see CsrfModule's two named constructors.
         $interceptor = new CsrfTokenInterceptor(
             new FakeCsrfToken('session-token'),
             new FakeRequestBodyToken(null),
-            new AllowedOrigin(null),
         );
+
+        $this->expectException(ForbiddenException::class);
+        $interceptor->invoke($this->invocation());
+    }
+
+    public function testAcceptanceIsDecidedByTheBoundTokenImplementation(): void
+    {
+        // A missing token reaches verify() as '' instead of being rejected before the port is
+        // consulted, so a context can bind an implementation that accepts token-less requests —
+        // a fake for tests whose subject is not CSRF, or a warn-only period during a migration.
+        // The interceptor must honour that answer rather than overrule it; this assertion is
+        // impossible to write if the missing case short-circuits.
+        $permissive = new class implements CsrfTokenInterface {
+            public function issue(): string
+            {
+                return 'irrelevant';
+            }
+
+            public function verify(string $candidate): bool
+            {
+                return true;
+            }
+
+            public function clear(): void
+            {
+            }
+        };
+
+        $interceptor = new CsrfTokenInterceptor($permissive, new FakeRequestBodyToken(null));
 
         $this->assertSame(self::PROCEED_SENTINEL, $interceptor->invoke($this->invocation()));
     }
@@ -41,7 +69,6 @@ final class CsrfTokenInterceptorTest extends TestCase
         $interceptor = new CsrfTokenInterceptor(
             new FakeCsrfToken('session-token'),
             new FakeRequestBodyToken('session-token'),
-            new AllowedOrigin(self::ALLOWED_ORIGIN),
         );
 
         $this->assertSame(self::PROCEED_SENTINEL, $interceptor->invoke($this->invocation()));
@@ -52,7 +79,6 @@ final class CsrfTokenInterceptorTest extends TestCase
         $interceptor = new CsrfTokenInterceptor(
             new FakeCsrfToken('session-token'),
             new FakeRequestBodyToken(null),
-            new AllowedOrigin(self::ALLOWED_ORIGIN),
         );
 
         $this->expectException(ForbiddenException::class);
@@ -65,7 +91,6 @@ final class CsrfTokenInterceptorTest extends TestCase
         $interceptor = new CsrfTokenInterceptor(
             new FakeCsrfToken('session-token'),
             new FakeRequestBodyToken('different-token'),
-            new AllowedOrigin(self::ALLOWED_ORIGIN),
         );
 
         $this->expectException(ForbiddenException::class);
@@ -81,7 +106,6 @@ final class CsrfTokenInterceptorTest extends TestCase
         $interceptor = new CsrfTokenInterceptor(
             new FakeCsrfToken(''),
             new FakeRequestBodyToken('any-value'),
-            new AllowedOrigin(self::ALLOWED_ORIGIN),
         );
 
         $this->expectException(ForbiddenException::class);

@@ -112,10 +112,13 @@ final class AppModule extends AbstractAppModule
         $this->bind(AdminUserInterface::class)->toProvider(AdminUserProvider::class);
         $this->bind(AdminGuard::class);
 
-        // Cross-origin defence for unsafe Page/Admin verbs: same-origin
-        // gate (#[SameOrigin]) and synchroniser-token gate (#[CsrfToken]).
-        // Unset env → null → SameOriginInterceptor short-circuits (dev / CLI).
+        // Cross-origin defence for unsafe Page/Admin verbs: the synchroniser-token gate
+        // (#[CsrfToken]) is always on; the same-origin gate (#[SameOrigin]) needs an origin to
+        // compare against, which only an HTTP deployment has. Choosing between the two named
+        // constructors is deliberate — there is no default that silently leaves a gate off.
         $allowedOrigin = (string) getenv('CMS_ALLOWED_ORIGIN') ?: null;
-        $this->install(new CsrfModule($allowedOrigin));
+        $this->install($allowedOrigin === null
+            ? CsrfModule::withoutSameOriginCheck()
+            : CsrfModule::withSameOriginCheck($allowedOrigin));
     }
 }
