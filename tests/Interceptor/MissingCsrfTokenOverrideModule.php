@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace BEAR\Kata\Interceptor;
 
-use BEAR\Kata\Fake\FakeRequestBodyToken;
 use BEAR\Kata\Fake\FakeRequestOrigin;
+use BEAR\Kata\Fake\FakeRequestToken;
 use Override;
 use Ray\Csrf\Http\AllowedOrigin;
-use Ray\Csrf\Http\RequestBodyTokenInterface;
 use Ray\Csrf\Http\RequestOriginInterface;
+use Ray\Csrf\Http\RequestTokenInterface;
 use Ray\Di\AbstractModule;
 
 /**
@@ -33,7 +33,7 @@ final class MissingCsrfTokenOverrideModule extends AbstractModule
             ->toInstance(new AllowedOrigin('https://cms.example.com'));
         $this->bind(RequestOriginInterface::class)
             ->toInstance(new FakeRequestOrigin(fetchSite: 'same-origin'));
-        $this->bind(RequestBodyTokenInterface::class)
-            ->toInstance(new FakeRequestBodyToken(null));
+        $this->bind(RequestTokenInterface::class)
+            ->toInstance(new FakeRequestToken(null));
     }
 }

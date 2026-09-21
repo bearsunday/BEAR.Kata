@@ -1,182 +1,103 @@
 # `csrf-same-origin-protection`
 
-**CSRFトークン + Same-Origin interceptorをAOPでbindする** · [← 索引に戻る](../index.md)
+**`ray/csrf` をAdmin境界に組み込む** · [← 索引に戻る](../index.md)
 
 - **Category:** Runtime / representation
 - **Status:** `canonical`
 - **Aliases:** CSRF, CsrfToken, SameOrigin, interceptor, AOP, form protection, synchronizer token, シンクロナイザートークン, CSRF対策, Ray.Csrf, _csrf_token, Sec-Fetch-Site
 - **Manual:** https://bearsunday.github.io/manuals/1.0/en/security.html
+- **Library:** [`ray/csrf`](https://github.com/ray-di/Ray.Csrf) — 仕組みはこちら。この kata は組み込み側だけを扱う。
 - **Use when:** Admin Page Resourceのwrite操作をCSRF攻撃とCross-Site Origin攻撃から保護したい。
 
 ## 例
 
-### Attribute
+CSRF の仕組み — synchronizer token、`hash_equals`、`Sec-Fetch-Site` / `Origin` / `Referer`
+の優先順位 — は [`ray/csrf`](https://github.com/ray-di/Ray.Csrf) が持つ。この kata が扱うのは
+**それを BEAR application の境界にどう据えるか**だけで、実装は再掲しない。
 
-中身を持たないmarker attribute — AOP matcherの目印:
+### どちらの門を arm するか
+
+二つの門は独立している。token 門は常時 on。same-origin 門は比較する相手 (browser origin)
+を持つ host でしか意味がないので、named constructor で明示的に選ぶ:
 
 ```php
-#[Attribute(Attribute::TARGET_METHOD)]
-final readonly class CsrfToken
-{
-}
+// AppModule
+$allowedOrigin = (string) getenv('CMS_ALLOWED_ORIGIN') ?: null;
+$this->install($allowedOrigin === null
+    ? CsrfModule::withoutSameOriginCheck()
+    : CsrfModule::withSameOriginCheck($allowedOrigin));
+```
 
-#[Attribute(Attribute::TARGET_METHOD)]
-final readonly class SameOrigin
-{
+`withoutSameOriginCheck()` は「書かなければ起きない」選択である点が要。ただしこれは
+**module API の話**で、composition root が env から導出している以上、値の欠落はここでは
+防げない。prod で落とすのは `ProdModule` の仕事:
+
+```php
+// ProdModule — 値が無ければ boot に失敗する
+if ($allowedOrigin === null) {
+    throw new MissingAllowedOriginException('CMS_ALLOWED_ORIGIN');
 }
 ```
 
-Adminのwrite methodに両方並べて付ける:
+### どこに attribute を付けるか
+
+**Page/Admin に付け、App resource には付けない。** App resource は CLI・seed・他 resource
+からの内部requestで到達する。そこに browser 前提の門を置くと、攻撃を防ぐのではなく
+正当な呼び出しを塞ぐ。browser が触る境界は Page であって App ではない:
 
 ```php
 #[SameOrigin]
 #[CsrfToken]
-public function onPost(): static
+public function onPost(string $title, string $body): static
 ```
 
-### CsrfModule — AOP bind
+method 引数に token を取らないことに注意。CSRF は transport の関心であって resource の
+意味論ではない。interceptor が header → `uri->query` → `$_POST` の順に拾う。
 
-attributeの付いた `ResourceObject` methodへ、それぞれのinterceptorをbindする:
+### token を view にどう渡すか
+
+Resource は hidden field の存在を知らない。renderer が `CsrfTokenInterface` から発行して
+template 変数に載せる:
 
 ```php
-final class CsrfModule extends AbstractModule
-{
-    public function __construct(
-        private readonly string|null $allowedOrigin = null,
-        private readonly string $csrfTokenField = '_csrf_token',
-    ) {
-        parent::__construct();
-    }
-
-    protected function configure(): void
-    {
-        $this->bind(AllowedOrigin::class)->toInstance(new AllowedOrigin($this->allowedOrigin));
-
-        $this->bindInterceptor(
-            $this->matcher->subclassesOf(ResourceObject::class),
-            $this->matcher->annotatedWith(SameOrigin::class),
-            [SameOriginInterceptor::class],
-        );
-
-        $this->bind(CsrfTokenInterface::class)->to(SessionCsrfToken::class)->in(Scope::SINGLETON);
-        $this->bindInterceptor(
-            $this->matcher->subclassesOf(ResourceObject::class),
-            $this->matcher->annotatedWith(CsrfToken::class),
-            [CsrfTokenInterceptor::class],
-        );
-    }
-}
+// CmsQiqRenderer — 全 template に渡る共通変数
+return [
+    'user' => $this->session->currentUser(),
+    'csrfToken' => $this->csrf->issue(),
+    'csrfTokenField' => $this->csrfTokenField->name,
+];
 ```
 
-install側（`AppModule`）— env未設定なら `null` で両interceptorとも素通し（dev / CLI）:
+field 名を template に直書きせず `CsrfTokenField` から渡すのは、wire 名を変えたときに
+form と interceptor が一緒に動くようにするため。
+
+### 付け忘れを test で塞ぐ
+
+ライブラリは「attribute が付いた method」しか守れない。**付け忘れは consumer 側の穴**で、
+library には検出しようがない。Admin の unsafe verb を reflection で列挙して突き合わせる:
 
 ```php
-$allowedOrigin = (string) getenv('CMS_ALLOWED_ORIGIN') ?: null;
-$this->install(new CsrfModule($allowedOrigin));
-```
-
-### CsrfTokenInterceptor — synchronizer token検証
-
-request bodyのtokenをsession保存のserver側stateと突き合わせる。欠落もmismatchも `ForbiddenException`:
-
-```php
-public function invoke(MethodInvocation $invocation): mixed
-{
-    if ($this->allowedOrigin->value === null) {
-        return $invocation->proceed();
-    }
-
-    $submitted = $this->body->submitted();
-    if ($submitted === null) {
-        throw new ForbiddenException('CSRF token missing.');
-    }
-
-    if (! $this->csrf->verify($submitted)) {
-        throw new ForbiddenException('CSRF token invalid.');
-    }
-
-    return $invocation->proceed();
-}
-```
-
-### SessionCsrfToken
-
-server側stateは `$_SESSION` に保存（cookieは使わない）。比較は `hash_equals`:
-
-```php
-public function issue(): string
-{
-    $this->start();
-
-    $existing = $_SESSION[self::SESSION_KEY] ?? null;
-    if (is_string($existing) && $existing !== '') {
-        return $existing;
-    }
-
-    $token = bin2hex(random_bytes(32));
-    $_SESSION[self::SESSION_KEY] = $token;
-
-    return $token;
-}
-
-public function verify(string $candidate): bool
-{
-    $this->start();
-
-    $stored = $_SESSION[self::SESSION_KEY] ?? null;
-    if (! is_string($stored) || $stored === '' || $candidate === '') {
-        return false;
-    }
-
-    return hash_equals($stored, $candidate);
-}
-```
-
-### SameOriginInterceptor — 3シグナル判定
-
-優先順: `Sec-Fetch-Site` があればそれだけで判定し、無ければ `Origin` → `Referer` の順:
-
-```php
-$fetchSite = $this->request->fetchSite();
-if ($fetchSite !== null) {
-    return $this->checkFetchSite($invocation, $fetchSite);
-}
-
-return $this->checkOriginOrReferer($invocation, $allowedCanonical);
-```
-
-fail-closed — 未知の `Sec-Fetch-Site` 値もOrigin/Refererへfallbackせず拒否、シグナル全欠落も拒否:
-
-```php
-throw new ForbiddenException(
-    sprintf('Same-origin policy: unknown Sec-Fetch-Site value: %s.', $fetchSite),
-);
-```
-
-```php
-throw new ForbiddenException(
-    'Same-origin policy: no Sec-Fetch-Site / Origin / Referer header.',
-);
-```
-
-malformedとmismatchは区別する — parse不能な `Origin`/`Referer` は400、origin不一致は403:
-
-```php
-$originCanonical = $this->canonicaliseOrigin($origin);
-if ($originCanonical === null) {
-    throw new BadRequestException(
-        sprintf('Same-origin policy: malformed Origin header: %s.', $origin),
+// AdminPageCsrfAttributeCoverageTest
+foreach ($this->unsafeMethods() as [$class, $method]) {
+    $attributes = array_map(
+        static fn (ReflectionAttribute $a): string => $a->getName(),
+        (new ReflectionMethod($class, $method))->getAttributes(),
     );
+    $this->assertContains(CsrfToken::class, $attributes);
+    $this->assertContains(SameOrigin::class, $attributes);
 }
-
-if ($originCanonical === $allowedCanonical) {
-    return $invocation->proceed();
-}
-
-throw new ForbiddenException(
-    sprintf('Same-origin policy: cross-origin Origin: %s.', $origin),
-);
 ```
+
+この kata で最も価値があるのはここ。正しいライブラリでも consumer のために保証できない
+ことを検査している。
+
+### host の前提
+
+同梱の `SessionCsrfToken` は `$_SESSION` に依存する — process が request を所有する host
+(PHP-FPM、built-in server、CLI) が前提。Swoole のような coroutine host では worker 単位で
+token が共有され防御が成立しないため、`CoroutineUnsafeStoreException` で拒否される
+([Ray.Csrf#7](https://github.com/ray-di/Ray.Csrf/issues/7))。並行 host に載せるなら
+`CsrfTokenInterface` を request scope の store に束縛し直す。
 
 ## Naming
 
@@ -193,43 +114,58 @@ attribute → interceptor → module の対応が名前で追える:
 
 ## 着手前チェック（Before）
 
-- [ ] `#[CsrfToken]` と `#[SameOrigin]` の2つのAttributeを使い、それぞれ interceptor をAOP bindすると決めたか。
-- [ ] CSRFトークンはsynchronizer token方式（sessionに保存したserver側stateと `hash_equals` で比較。cookieは使わない）と理解したか。
-- [ ] Same-Originは `Sec-Fetch-Site` / `Origin` / `Referer` の3シグナルで判定し、全欠落時はfail-closedにすると理解したか。
-- [ ] `CsrfModule(allowedOrigin)` の `AllowedOrigin` が `null` なら両interceptorとも素通し（dev/CLI/test用スイッチ）で、prodでは `CMS_ALLOWED_ORIGIN` の設定が必要と理解したか。
+- [ ] CSRF の実装ではなく、`ray/csrf` の**組み込み**が主題だと理解したか。token 生成・`hash_equals`・origin 解析は library 側にある。
+- [ ] 門を掛けるのは browser が触る Page/Admin であって、CLI や内部requestから到達する App resource ではないと理解したか。
+- [ ] token 門と same-origin 門は独立で、後者は `withSameOriginCheck()` / `withoutSameOriginCheck()` のどちらを呼ぶかで決まると理解したか。prod での欠落は `ProdModule` が boot時に落とす。
+- [ ] attribute の付け忘れは library が検出できない consumer 側の穴で、application が test で塞ぐと理解したか。
+- [ ] 同梱 store が前提とする host (request が process を所有する) を確認したか。
 
 ## Source
 
-- [`src-csrf/Attribute/CsrfToken.php`](../src-csrf/Attribute/CsrfToken.php)
-- [`src-csrf/Attribute/SameOrigin.php`](../src-csrf/Attribute/SameOrigin.php)
-- [`src-csrf/Interceptor/CsrfTokenInterceptor.php`](../src-csrf/Interceptor/CsrfTokenInterceptor.php)
-- [`src-csrf/Interceptor/SameOriginInterceptor.php`](../src-csrf/Interceptor/SameOriginInterceptor.php)
-- [`src-csrf/CsrfModule.php`](../src-csrf/CsrfModule.php)
-- [`src-csrf/SessionCsrfToken.php`](../src-csrf/SessionCsrfToken.php)
-- [`src/Module/AppModule.php`](../src/Module/AppModule.php)
+application が所有する部分のみ。library は [`ray/csrf`](https://github.com/ray-di/Ray.Csrf):
+
+- [`src/Module/AppModule.php`](../src/Module/AppModule.php) — どちらの門を arm するか
+- [`src/Module/ProdModule.php`](../src/Module/ProdModule.php) — prod の fail-closed
+- [`src/Exception/MissingAllowedOriginException.php`](../src/Exception/MissingAllowedOriginException.php)
+- [`src/Renderer/CmsQiqRenderer.php`](../src/Renderer/CmsQiqRenderer.php) — token と field 名の view 供給
+- [`src/Resource/Page/Admin/Article.php`](../src/Resource/Page/Admin/Article.php) — attribute の置き場
+- [`src/Auth/NativeAuthSession.php`](../src/Auth/NativeAuthSession.php) — login/logout での token 破棄
 
 ## Tests
 
-- [`tests/Interceptor/CsrfTokenInterceptorTest.php`](../tests/Interceptor/CsrfTokenInterceptorTest.php)
-- [`tests/Interceptor/CsrfTokenWiringTest.php`](../tests/Interceptor/CsrfTokenWiringTest.php)
-- [`tests/Interceptor/SameOriginInterceptorTest.php`](../tests/Interceptor/SameOriginInterceptorTest.php)
+- [`tests/Interceptor/CsrfTokenWiringTest.php`](../tests/Interceptor/CsrfTokenWiringTest.php) — 宣言が injector 経由で実際に interception になるか
 - [`tests/Interceptor/SameOriginWiringTest.php`](../tests/Interceptor/SameOriginWiringTest.php)
-- [`tests/Interceptor/AdminPageCsrfAttributeCoverageTest.php`](../tests/Interceptor/AdminPageCsrfAttributeCoverageTest.php)
+- [`tests/Interceptor/AdminPageCsrfAttributeCoverageTest.php`](../tests/Interceptor/AdminPageCsrfAttributeCoverageTest.php) — 付け忘れ検出
+- [`tests/Interceptor/ProdCsrfBootTest.php`](../tests/Interceptor/ProdCsrfBootTest.php) — origin 未設定で prod が boot に失敗する
+
+interceptor 単体の挙動 (signal 優先順位、malformed origin、token 比較) は library 側の
+test が持つ。ここで再実装すると、同じ契約の記述が二つになって必ずずれる。
 
 ## Key points
 
-`#[CsrfToken]` → synchronizer token検証（`$_SESSION` 保存 + `hash_equals`）。`#[SameOrigin]` → Sec-Fetch-Site/Origin/Referer 3シグナル判定、fail-closed（未知の `Sec-Fetch-Site` 値もfallbackしない）。malformedな `Origin`/`Referer` は400、mismatchは403。hidden fieldはrendererが全templateへ供給する `$csrfTokenField` で埋め、logout時は `CsrfTokenInterface::clear()`。`AdminPageCsrfAttributeCoverageTest` が全Admin write methodへの付け忘れをreflectionで検出する。
+門の位置と網羅が application の責任、仕組みは library の責任。`#[CsrfToken]` / `#[SameOrigin]`
+は browser が触る Page/Admin の unsafe verb にのみ付け、method 引数には token を取らない。
+hidden field は renderer が `$csrfToken` / `$csrfTokenField` として全 template に供給し、
+logout では `CsrfTokenInterface::clear()`。`AdminPageCsrfAttributeCoverageTest` が付け忘れを
+reflection で検出する — library には見えない穴で、ここが application 側で最も効く一手。
 
 ## Do not
 
-- prodで `CMS_ALLOWED_ORIGIN` 未設定のまま公開しない — `AllowedOrigin` が `null` だと両interceptorとも素通し（dev/CLI/test用スイッチ）になる。エラーにはならず、静かに無防備になる。
+- CSRF の仕組みを自前で書かない — token 生成も `hash_equals` も origin 解析も `ray/csrf` にある。security code の複製は、複製された分だけ review を受けない実装が増えるということ。
+- App resource に門を付けない — CLI・seed・内部requestから到達するので、攻撃ではなく正当な呼び出しを塞ぐ。browser 境界は Page。
+- 設定値の欠落で防御が静かに外れる形にしない — 「検証しない」は `withoutSameOriginCheck()` という**書かなければ起きない**選択として表す。ただし module API がそう書けても composition root が env から導出するなら欠落は防げない。落とすのは `ProdModule` の役割。
+- attribute の付け忘れを library に期待しない — 付いていない method は interceptor の視界に入らない。網羅は application の test で保証する。
+- **coroutine hostにそのまま持ち込まない** — 同梱の `SessionCsrfToken` は `$_SESSION` 依存で、Swooleのようにworker内で複数requestが並行する環境ではtokenがworker単位で共有され防御が成立しない([Ray.Csrf#7](https://github.com/ray-di/Ray.Csrf/issues/7)、未解決)。並行hostでは `CsrfTokenInterface` をrequest scopeのstoreに束縛し直す。
 
 ## マスター確認（After）
 
-- [ ] token mismatch で `ForbiddenException` が throw される。
-- [ ] origin mismatch で `ForbiddenException` が throw される。
-- [ ] 全Admin write methodにattributeが付いていることを coverage test 相当で green。
-- [ ] `CsrfTokenInterceptorTest.php` / `SameOriginInterceptorTest.php` 相当で green。
+- [ ] 全Admin write methodにattributeが付いていることを coverage test で green。属性を1つ外すと落ちることを確認した。
+- [ ] wiring test が injector 経由で interception の成立を示している。
+- [ ] prod context で `CMS_ALLOWED_ORIGIN` 未設定なら boot に失敗する。
+- [ ] renderer が全 template に token と field 名を供給し、logout で `clear()` される。
+
+green が意味するのは「この構成で組み込み側の義務が満たされている」ことであって、
+CSRF 防御そのものの証明ではない。後者は `ray/csrf` の test が持つ。
 
 ## See also
 

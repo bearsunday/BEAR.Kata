@@ -10,6 +10,16 @@ The choreography comes from
 [Issue #37](https://github.com/bearsunday/MyVendor.Cms/issues/37) (Form /
 Confirmation / CSRF strategy) and the Codex review pass that followed.
 
+**Status: 実装はこのrepositoryを離れた。** ここに記録された設計は
+[`ray/csrf`](https://github.com/ray-di/Ray.Csrf) として切り出され、`src-csrf/` は削除された。
+以下で `src-csrf/` を指す記述は、インキュベーション期間の設計史として読むこと。
+package 化にあたり、application統合で見つかった4件の欠陥
+([#4](https://github.com/ray-di/Ray.Csrf/issues/4) /
+[#5](https://github.com/ray-di/Ray.Csrf/issues/5) /
+[#6](https://github.com/ray-di/Ray.Csrf/issues/6) /
+[#7](https://github.com/ray-di/Ray.Csrf/issues/7)) を修正した。#7 は未解決で、
+同梱 store は coroutine host で例外を投げて拒否する。
+
 ---
 
 ## Goal
@@ -106,23 +116,30 @@ In priority order:
    the gate short-circuits at the top of the interceptor and never
    reaches this branch.
 
-### Short-circuit mode
+### Short-circuit mode — 撤回
 
-`AllowedOrigin->value === null` disables **both** gates
-(`SameOriginInterceptor` and `CsrfTokenInterceptor`). That's the
-test / CLI / fake-app shape — none of those have a browser on the
-other side, so neither origin signals nor `_csrf_token` would be
-populated; both checks would always fail-closed, which would block
-legitimate CLI invocations of admin Page resources for no security
-benefit. Tying both gates to the same on/off knob keeps the mental
-model "production HTTP enforces, everywhere else skips" in one
-config value.
+当初は `AllowedOrigin->value === null` が **両方** の門
+(`SameOriginInterceptor` と `CsrfTokenInterceptor`) を無効化していた。
+「production HTTP は強制、それ以外は素通り」という mental model を
+config 値ひとつに畳む意図だったが、これは誤りだった。二つの門は
+独立した防御であり、片方が不要な状況はもう片方が不要な理由にならない。
+origin を比較する相手がいないCLI/testでも、token の検証は成立する。
 
-**Production gotcha.** Because `null` means "skip", a production HTTP
-deployment that forgets to set `CMS_ALLOWED_ORIGIN` silently disables
-both gates. The fail-closed path belongs in a `ProdModule` that aborts
-at boot if the env var is missing — out of scope for this PR. Tracked
-under [docs/scope.md](../scope.md) Tier 2 "Production tuning notes".
+現在は `AllowedOrigin` を読むのは `SameOriginInterceptor` だけで、
+`value === null` は same-origin 門のみを外す。token 門は常に on で、
+受理可否は束縛された `CsrfTokenInterface` が決める — CSRFが主題でない
+テストは寛容な実装を束縛すればよく、門ごと外す必要がない。
+
+**Production gotcha — resolved.** `null` means "no origin to compare
+against", which is the right answer for CLI and development but would
+stand the same-origin gate down for every request in production. It is
+therefore no longer reachable by omission: `CsrfModule`'s constructor is
+private and the choice is made by calling `withSameOriginCheck()` or
+`withoutSameOriginCheck()`, and `ProdModule` throws
+`MissingAllowedOriginException` at boot when `CMS_ALLOWED_ORIGIN` is
+unset. The token gate never depended on this value in the first place —
+that coupling was removed at the same time, so a missing origin can no
+longer disable token verification as a side effect.
 
 ### What this layer doesn't do
 

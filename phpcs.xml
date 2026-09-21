@@ -19,9 +19,7 @@
     <!-- Directories to be checked -->
     <file>bin</file>
     <file>src</file>
-    <file>src-csrf</file>
     <file>tests</file>
-    <file>tests-csrf</file>
     <exclude-pattern>*/bin/semantic-ex/*</exclude-pattern>
     <exclude-pattern>*/tests/tmp/*</exclude-pattern>
 

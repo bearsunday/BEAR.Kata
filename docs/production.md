@@ -83,7 +83,7 @@ composer security:taint
 ```
 
 The GitHub Actions security workflow is manual-dispatch and runs the same taint
-analysis against `src` and `src-csrf`.
+analysis against `src`.
 
 ## Opt-In Security Workflows
 

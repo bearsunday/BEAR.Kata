@@ -7,6 +7,4 @@ parameters:
     maximumNumberOfProcesses: 1
   paths:
     - src
-    - src-csrf
     - tests
-    - tests-csrf

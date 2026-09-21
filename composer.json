@@ -25,6 +25,7 @@
         "qiq/qiq": "^3.0",
         "ray/aop": "^2.12",
         "ray/aura-sql-module": "^1.17",
+        "ray/csrf": "^0.1",
         "ray/di": "^2.14",
         "ray/input-query": "^1.0",
         "ray/media-query": "^1.1"
@@ -45,15 +46,13 @@
     },
     "autoload": {
         "psr-4": {
-            "BEAR\\Kata\\": "src/",
-            "Ray\\Csrf\\": "src-csrf/"
+            "BEAR\\Kata\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
             "BEAR\\Kata\\": "tests/",
-            "BEAR\\Kata\\Example\\ImportedCatalog\\": "examples/import/ImportedCatalog/src/",
-            "Ray\\Csrf\\": "tests-csrf/"
+            "BEAR\\Kata\\Example\\ImportedCatalog\\": "examples/import/ImportedCatalog/src/"
         }
     },
     "scripts": {
@@ -133,16 +132,15 @@
             "./vendor/bin/psalm --show-info=true",
             "./vendor/bin/phpstan analyse -c phpstan.neon --memory-limit=512M"
         ],
-        "phpmd": "php -d error_reporting=22527 ./vendor/bin/phpmd src,src-csrf,bin text ./phpmd.xml --exclude \"bin/semantic-ex/*\"",
+        "phpmd": "php -d error_reporting=22527 ./vendor/bin/phpmd src,bin text ./phpmd.xml --exclude \"bin/semantic-ex/*\"",
         "security": [
             "@security:sast",
             "@security:taint"
         ],
         "security:sast": [
-            "./vendor/bin/bear.security-scan src",
-            "./vendor/bin/bear.security-scan src-csrf"
+            "./vendor/bin/bear.security-scan src"
         ],
-        "security:taint": "./vendor/bin/psalm --taint-analysis src src-csrf",
+        "security:taint": "./vendor/bin/psalm --taint-analysis src",
         "tests": [
             "@cs",
             "@sa",
