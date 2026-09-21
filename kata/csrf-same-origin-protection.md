@@ -255,6 +255,8 @@ attribute → interceptor → module の対応が名前で追える:
 
 - 欠落トークンを interceptor 側で握り潰さない — `verify()` に `''` として渡し、受理可否は束縛された `CsrfTokenInterface` に決めさせる。ここで短絡すると、CSRFが主題でないテスト用の寛容な実装を束縛できなくなり、消費者は interceptor ごと置き換えることになる。
 - 設定値の欠落で防御が静かに外れる形にしない — 「検証しない」は `withoutSameOriginCheck()` という**書かなければ起きない**選択として表す。env の設定を運用者の記憶に委ねる設計は、同カテゴリの [`admin-auth-boundary`](admin-auth-boundary.md)（「認証境界は型で表現する」）と矛盾する。
+- server stateの置き場をhardcodeしない — session keyは `CsrfSessionKey` として注入する。既存systemとsessionを共有するapplicationは、定数に固められると「slot名を変えたいだけ」で `CsrfTokenInterface` の再実装を強いられる。
+- **coroutine hostにそのまま持ち込まない** — `SessionCsrfToken` はPHPの `$_SESSION` に依存するので、Swooleのようにworker内で複数requestが並行する環境ではtokenがworker単位で共有され、防御が成立しない([Ray.Csrf#7](https://github.com/ray-di/Ray.Csrf/issues/7)、未解決)。この kata が前提とするのはrequestごとにprocessが完結するhostであり、並行hostでは `CsrfTokenInterface` をrequest scopeのstoreに束縛し直す必要がある。
 
 ## マスター確認（After）
 
