@@ -32,8 +32,6 @@
     <testsuite name="service">
       <directory>tests/Service</directory>
     </testsuite>
-    <testsuite name="csrf">
-    </testsuite>
   </testsuites>
   <source>
     <include>
