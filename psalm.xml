@@ -11,7 +11,6 @@
 >
     <projectFiles>
         <directory name="src"/>
-        <directory name="src-csrf"/>
         <ignoreFiles>
             <directory name="vendor"/>
             <file name="src/Bootstrap.php" />

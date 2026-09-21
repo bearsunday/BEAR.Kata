@@ -9,13 +9,13 @@ use BEAR\Kata\Auth\AuthSessionInterface;
 use BEAR\Kata\Fake\FakeAdminAuthSessionProvider;
 use BEAR\Kata\Fake\FakeAuthProvider;
 use BEAR\Kata\Fake\FakeCsrfToken;
-use BEAR\Kata\Fake\FakeRequestBodyToken;
 use BEAR\Kata\Fake\FakeRequestOrigin;
+use BEAR\Kata\Fake\FakeRequestToken;
 use BEAR\Kata\Fake\FakeSqlQuery;
 use Ray\Csrf\CsrfTokenInterface;
 use Ray\Csrf\Http\AllowedOrigin;
-use Ray\Csrf\Http\RequestBodyTokenInterface;
 use Ray\Csrf\Http\RequestOriginInterface;
+use Ray\Csrf\Http\RequestTokenInterface;
 use Ray\Di\AbstractModule;
 use Ray\Di\Scope;
 use Ray\MediaQuery\SqlQueryInterface;
@@ -44,6 +44,6 @@ final class FakeModule extends AbstractModule
         $this->bind(AllowedOrigin::class)->toInstance(new AllowedOrigin(null));
         $this->bind(RequestOriginInterface::class)->to(FakeRequestOrigin::class)->in(Scope::SINGLETON);
         $this->bind(CsrfTokenInterface::class)->to(FakeCsrfToken::class)->in(Scope::SINGLETON);
-        $this->bind(RequestBodyTokenInterface::class)->to(FakeRequestBodyToken::class)->in(Scope::SINGLETON);
+        $this->bind(RequestTokenInterface::class)->to(FakeRequestToken::class)->in(Scope::SINGLETON);
     }
 }

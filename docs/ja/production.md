@@ -79,7 +79,7 @@ workflow なので default quality gate からは分けています。
 composer security:taint
 ```
 
-GitHub Actions の security workflow は manual-dispatch で、`src` と `src-csrf` に
+GitHub Actions の security workflow は manual-dispatch で、`src` に
 同じ taint analysis を実行します。
 
 ## Opt-In Security Workflows

@@ -10,6 +10,16 @@ The choreography comes from
 [Issue #37](https://github.com/bearsunday/MyVendor.Cms/issues/37) (Form /
 Confirmation / CSRF strategy) and the Codex review pass that followed.
 
+**Status: 実装はこのrepositoryを離れた。** ここに記録された設計は
+[`ray/csrf`](https://github.com/ray-di/Ray.Csrf) として切り出され、`src-csrf/` は削除された。
+以下で `src-csrf/` を指す記述は、インキュベーション期間の設計史として読むこと。
+package 化にあたり、application統合で見つかった4件の欠陥
+([#4](https://github.com/ray-di/Ray.Csrf/issues/4) /
+[#5](https://github.com/ray-di/Ray.Csrf/issues/5) /
+[#6](https://github.com/ray-di/Ray.Csrf/issues/6) /
+[#7](https://github.com/ray-di/Ray.Csrf/issues/7)) を修正した。#7 は未解決で、
+同梱 store は coroutine host で例外を投げて拒否する。
+
 ---
 
 ## Goal
