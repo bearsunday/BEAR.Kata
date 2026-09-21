@@ -246,6 +246,7 @@ attribute → interceptor → module の対応が名前で追える:
 - [`tests/Interceptor/SameOriginInterceptorTest.php`](../tests/Interceptor/SameOriginInterceptorTest.php)
 - [`tests/Interceptor/SameOriginWiringTest.php`](../tests/Interceptor/SameOriginWiringTest.php)
 - [`tests/Interceptor/AdminPageCsrfAttributeCoverageTest.php`](../tests/Interceptor/AdminPageCsrfAttributeCoverageTest.php)
+- [`tests/Interceptor/SessionCsrfTokenTest.php`](../tests/Interceptor/SessionCsrfTokenTest.php)
 
 ## Key points
 

@@ -7,10 +7,11 @@ namespace Ray\Csrf\Http;
 /**
  * Canonical origin the CSRF defence stack is configured for.
  *
- * `value === null` short-circuits both `SameOriginInterceptor` and
- * `CsrfTokenInterceptor` — used by tests / CLI / dev where there's
- * no browser on the other side. The consumer resolves the value once
- * (typically from an env var) and binds an instance.
+ * Read by `SameOriginInterceptor` only. `value === null` runs without the
+ * same-origin gate, for a host with no browser origin to compare against;
+ * the token gate is independent and stays on. The consumer resolves the
+ * value once (typically from an env var) and binds an instance through
+ * `CsrfModule`'s named constructors.
  */
 final readonly class AllowedOrigin
 {

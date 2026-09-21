@@ -114,8 +114,11 @@ final class AppModule extends AbstractAppModule
 
         // Cross-origin defence for unsafe Page/Admin verbs: the synchroniser-token gate
         // (#[CsrfToken]) is always on; the same-origin gate (#[SameOrigin]) needs an origin to
-        // compare against, which only an HTTP deployment has. Choosing between the two named
-        // constructors is deliberate — there is no default that silently leaves a gate off.
+        // compare against, which only an HTTP deployment has. This branch still derives that
+        // from an env var, so an unset CMS_ALLOWED_ORIGIN runs without the origin gate here —
+        // what makes that impossible in production is ProdModule, which refuses to boot
+        // without the value. The named constructors make the choice visible; they do not make
+        // it for the composition root.
         $allowedOrigin = (string) getenv('CMS_ALLOWED_ORIGIN') ?: null;
         $this->install($allowedOrigin === null
             ? CsrfModule::withoutSameOriginCheck()

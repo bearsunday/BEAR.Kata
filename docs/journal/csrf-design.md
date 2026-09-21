@@ -106,17 +106,19 @@ In priority order:
    the gate short-circuits at the top of the interceptor and never
    reaches this branch.
 
-### Short-circuit mode
+### Short-circuit mode — 撤回
 
-`AllowedOrigin->value === null` disables **both** gates
-(`SameOriginInterceptor` and `CsrfTokenInterceptor`). That's the
-test / CLI / fake-app shape — none of those have a browser on the
-other side, so neither origin signals nor `_csrf_token` would be
-populated; both checks would always fail-closed, which would block
-legitimate CLI invocations of admin Page resources for no security
-benefit. Tying both gates to the same on/off knob keeps the mental
-model "production HTTP enforces, everywhere else skips" in one
-config value.
+当初は `AllowedOrigin->value === null` が **両方** の門
+(`SameOriginInterceptor` と `CsrfTokenInterceptor`) を無効化していた。
+「production HTTP は強制、それ以外は素通り」という mental model を
+config 値ひとつに畳む意図だったが、これは誤りだった。二つの門は
+独立した防御であり、片方が不要な状況はもう片方が不要な理由にならない。
+origin を比較する相手がいないCLI/testでも、token の検証は成立する。
+
+現在は `AllowedOrigin` を読むのは `SameOriginInterceptor` だけで、
+`value === null` は same-origin 門のみを外す。token 門は常に on で、
+受理可否は束縛された `CsrfTokenInterface` が決める — CSRFが主題でない
+テストは寛容な実装を束縛すればよく、門ごと外す必要がない。
 
 **Production gotcha — resolved.** `null` means "no origin to compare
 against", which is the right answer for CLI and development but would
