@@ -18,20 +18,22 @@ use const PHP_SESSION_ACTIVE;
 /** @SuppressWarnings("PHPMD.Superglobals") Session adapter boundary. */
 final class SessionCsrfToken implements CsrfTokenInterface
 {
-    private const string SESSION_KEY = 'ray_csrf_token';
+    public function __construct(private CsrfSessionKey $sessionKey)
+    {
+    }
 
     #[Override]
     public function issue(): string
     {
         $this->start();
 
-        $existing = $_SESSION[self::SESSION_KEY] ?? null;
+        $existing = $_SESSION[$this->sessionKey->name] ?? null;
         if (is_string($existing) && $existing !== '') {
             return $existing;
         }
 
         $token = bin2hex(random_bytes(32));
-        $_SESSION[self::SESSION_KEY] = $token;
+        $_SESSION[$this->sessionKey->name] = $token;
 
         return $token;
     }
@@ -41,7 +43,7 @@ final class SessionCsrfToken implements CsrfTokenInterface
     {
         $this->start();
 
-        $stored = $_SESSION[self::SESSION_KEY] ?? null;
+        $stored = $_SESSION[$this->sessionKey->name] ?? null;
         if (! is_string($stored) || $stored === '' || $candidate === '') {
             return false;
         }
@@ -53,7 +55,7 @@ final class SessionCsrfToken implements CsrfTokenInterface
     public function clear(): void
     {
         $this->start();
-        unset($_SESSION[self::SESSION_KEY]);
+        unset($_SESSION[$this->sessionKey->name]);
     }
 
     private function start(): void

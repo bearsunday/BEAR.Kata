@@ -33,6 +33,7 @@ final class CsrfModule extends AbstractModule
     private function __construct(
         private readonly string|null $allowedOrigin,
         private readonly string $csrfTokenField,
+        private readonly string $sessionKey,
     ) {
         parent::__construct();
     }
@@ -41,8 +42,9 @@ final class CsrfModule extends AbstractModule
     public static function withSameOriginCheck(
         string $allowedOrigin,
         string $csrfTokenField = '_csrf_token',
+        string $sessionKey = 'ray_csrf_token',
     ): self {
-        return new self($allowedOrigin, $csrfTokenField);
+        return new self($allowedOrigin, $csrfTokenField, $sessionKey);
     }
 
     /**
@@ -50,9 +52,11 @@ final class CsrfModule extends AbstractModule
      * API host — where the same-origin gate would reject every request rather than protect it.
      * The token gate stays on either way; the two are independent defences.
      */
-    public static function withoutSameOriginCheck(string $csrfTokenField = '_csrf_token'): self
-    {
-        return new self(null, $csrfTokenField);
+    public static function withoutSameOriginCheck(
+        string $csrfTokenField = '_csrf_token',
+        string $sessionKey = 'ray_csrf_token',
+    ): self {
+        return new self(null, $csrfTokenField, $sessionKey);
     }
 
     #[Override]
@@ -60,6 +64,7 @@ final class CsrfModule extends AbstractModule
     {
         $this->bind(AllowedOrigin::class)->toInstance(new AllowedOrigin($this->allowedOrigin));
         $this->bind(CsrfTokenField::class)->toInstance(new CsrfTokenField($this->csrfTokenField));
+        $this->bind(CsrfSessionKey::class)->toInstance(new CsrfSessionKey($this->sessionKey));
 
         $this->bind(RequestOriginInterface::class)->to(ServerRequestOrigin::class);
         $this->bindInterceptor(

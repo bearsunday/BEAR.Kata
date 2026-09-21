@@ -12,12 +12,13 @@ repository under `src-csrf/` until it is published as the
 | `Ray\Csrf\Attribute\CsrfToken` | Marker for unsafe verbs requiring a synchroniser token. |
 | `Ray\Csrf\Http\RequestOriginInterface` / `ServerRequestOrigin` | Reads `Sec-Fetch-Site` / `Origin` / `Referer` from the request. |
 | `Ray\Csrf\Http\RequestBodyTokenInterface` / `ServerRequestBodyToken` | Reads the submitted token from the form body. |
-| `Ray\Csrf\Http\AllowedOrigin` | Configured canonical origin. `value === null` disables both gates (dev / CLI / test). |
+| `Ray\Csrf\Http\AllowedOrigin` | Configured canonical origin. `value === null` runs without the same-origin gate, for a host with no browser origin to compare against. The token gate is unaffected — the two are independent. |
 | `Ray\Csrf\Http\CsrfTokenField` | Wire-protocol field name (default `_csrf_token`). |
+| `Ray\Csrf\CsrfSessionKey` | Session slot holding the issued token (default `ray_csrf_token`). Configurable so an application sharing a session with an existing system can name the slot. |
 | `Ray\Csrf\CsrfTokenInterface` / `SessionCsrfToken` | Server-side token issue / verify / clear. |
 | `Ray\Csrf\Interceptor\SameOriginInterceptor` | Same-origin gate fired by `#[SameOrigin]`. |
 | `Ray\Csrf\Interceptor\CsrfTokenInterceptor` | Synchroniser-token gate fired by `#[CsrfToken]`. |
-| `Ray\Csrf\CsrfModule` | One-stop DI wiring; consumer passes the allowed origin and optional field name. |
+| `Ray\Csrf\CsrfModule` | One-stop DI wiring. Private constructor; build it with `withSameOriginCheck()` or `withoutSameOriginCheck()` so that running without the origin gate is a deliberate, greppable call rather than an omitted argument. |
 | `Ray\Csrf\Exception\ForbiddenException` | Thrown by both gates on policy failure; extends `BEAR\Resource\Exception\BadRequestException` so the 4xx pipeline serves the response. |
 
 ## Consumer integration
@@ -25,8 +26,13 @@ repository under `src-csrf/` until it is published as the
 ```php
 // AppModule
 $allowedOrigin = ((string) getenv('CMS_ALLOWED_ORIGIN')) ?: null;
-$this->install(new \Ray\Csrf\CsrfModule($allowedOrigin));
+$this->install($allowedOrigin === null
+    ? \Ray\Csrf\CsrfModule::withoutSameOriginCheck()
+    : \Ray\Csrf\CsrfModule::withSameOriginCheck($allowedOrigin));
 ```
+
+In production the absent case is an error rather than a default: `ProdModule` throws
+`MissingAllowedOriginException` at boot when `CMS_ALLOWED_ORIGIN` is unset.
 
 Annotate the Page/Admin write methods that need protection:
 

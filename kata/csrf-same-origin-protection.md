@@ -124,20 +124,26 @@ public function invoke(MethodInvocation $invocation): mixed
 
 ### SessionCsrfToken
 
-server側stateは `$_SESSION` に保存（cookieは使わない）。比較は `hash_equals`:
+server側stateは `$_SESSION` に保存（cookieは使わない）。比較は `hash_equals`。session keyは
+注入する — 既存systemとsessionを共有するapplicationはslot名を指定できなければならず、
+定数に固めると「文字列を変えたいだけ」で `CsrfTokenInterface` の再実装を強いることになる:
 
 ```php
+public function __construct(private CsrfSessionKey $sessionKey)
+{
+}
+
 public function issue(): string
 {
     $this->start();
 
-    $existing = $_SESSION[self::SESSION_KEY] ?? null;
+    $existing = $_SESSION[$this->sessionKey->name] ?? null;
     if (is_string($existing) && $existing !== '') {
         return $existing;
     }
 
     $token = bin2hex(random_bytes(32));
-    $_SESSION[self::SESSION_KEY] = $token;
+    $_SESSION[$this->sessionKey->name] = $token;
 
     return $token;
 }
@@ -146,7 +152,7 @@ public function verify(string $candidate): bool
 {
     $this->start();
 
-    $stored = $_SESSION[self::SESSION_KEY] ?? null;
+    $stored = $_SESSION[$this->sessionKey->name] ?? null;
     if (! is_string($stored) || $stored === '' || $candidate === '') {
         return false;
     }
