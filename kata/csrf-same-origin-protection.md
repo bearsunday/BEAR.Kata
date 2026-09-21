@@ -41,11 +41,25 @@ attributeの付いた `ResourceObject` methodへ、それぞれのinterceptorを
 ```php
 final class CsrfModule extends AbstractModule
 {
-    public function __construct(
-        private readonly string|null $allowedOrigin = null,
-        private readonly string $csrfTokenField = '_csrf_token',
+    private function __construct(
+        private readonly string|null $allowedOrigin,
+        private readonly string $csrfTokenField,
     ) {
         parent::__construct();
+    }
+
+    /** 両方のgate: token gateは常時、same-origin gateは $allowedOrigin に対して */
+    public static function withSameOriginCheck(
+        string $allowedOrigin,
+        string $csrfTokenField = '_csrf_token',
+    ): self {
+        return new self($allowedOrigin, $csrfTokenField);
+    }
+
+    /** token gateのみ。比較すべきbrowser originを持たないCLI / API host向け */
+    public static function withoutSameOriginCheck(string $csrfTokenField = '_csrf_token'): self
+    {
+        return new self(null, $csrfTokenField);
     }
 
     protected function configure(): void
@@ -68,36 +82,45 @@ final class CsrfModule extends AbstractModule
 }
 ```
 
-install側（`AppModule`）— env未設定なら `null` で両interceptorとも素通し（dev / CLI）:
+constructorはprivate。「same-origin検証をしない」は**書き忘れでは起きず**、grepできる呼び出しになる。
+token gateはどちらの入口でも常時armされる — 2つは独立した防御なので、片方の設定不足が
+もう片方を道連れにしない。
+
+install側（`AppModule`）— devにはbrowser originが無いので後者を選ぶ:
 
 ```php
 $allowedOrigin = (string) getenv('CMS_ALLOWED_ORIGIN') ?: null;
-$this->install(new CsrfModule($allowedOrigin));
+$this->install($allowedOrigin === null
+    ? CsrfModule::withoutSameOriginCheck()
+    : CsrfModule::withSameOriginCheck($allowedOrigin));
 ```
+
+prodで env を忘れた場合は `ProdModule` が **boot時に落ちる**（`MissingAllowedOriginException`）。
+「設定し忘れるな」という運用上の注意ではなく、起動しないという形で表現する。
 
 ### CsrfTokenInterceptor — synchronizer token検証
 
-request bodyのtokenをsession保存のserver側stateと突き合わせる。欠落もmismatchも `ForbiddenException`:
+request bodyのtokenをsession保存のserver側stateと突き合わせる。欠落は `''` として
+`verify()` に渡す — 受理してよいかを決めるのは束縛された `CsrfTokenInterface` であって、
+interceptorではない:
 
 ```php
 public function invoke(MethodInvocation $invocation): mixed
 {
-    if ($this->allowedOrigin->value === null) {
-        return $invocation->proceed();
-    }
-
     $submitted = $this->body->submitted();
-    if ($submitted === null) {
-        throw new ForbiddenException('CSRF token missing.');
-    }
-
-    if (! $this->csrf->verify($submitted)) {
-        throw new ForbiddenException('CSRF token invalid.');
+    if (! $this->csrf->verify($submitted ?? '')) {
+        throw new ForbiddenException(
+            $submitted === null ? 'CSRF token missing.' : 'CSRF token invalid.',
+        );
     }
 
     return $invocation->proceed();
 }
 ```
+
+例外の出し分けは診断のためで、独立した門ではない。`SessionCsrfToken::verify('')` は `false` を
+返すので、既定構成の外形的な挙動は「欠落もmismatchも `ForbiddenException`」のまま変わらない。
+変わるのは、CSRFが主題でないテスト用の寛容な実装を**束縛できるようになる**ことだけ。
 
 ### SessionCsrfToken
 
@@ -196,7 +219,7 @@ attribute → interceptor → module の対応が名前で追える:
 - [ ] `#[CsrfToken]` と `#[SameOrigin]` の2つのAttributeを使い、それぞれ interceptor をAOP bindすると決めたか。
 - [ ] CSRFトークンはsynchronizer token方式（sessionに保存したserver側stateと `hash_equals` で比較。cookieは使わない）と理解したか。
 - [ ] Same-Originは `Sec-Fetch-Site` / `Origin` / `Referer` の3シグナルで判定し、全欠落時はfail-closedにすると理解したか。
-- [ ] `CsrfModule(allowedOrigin)` の `AllowedOrigin` が `null` なら両interceptorとも素通し（dev/CLI/test用スイッチ）で、prodでは `CMS_ALLOWED_ORIGIN` の設定が必要と理解したか。
+- [ ] token gate と same-origin gate は独立に arm され、前者は常時、後者は `withSameOriginCheck()` / `withoutSameOriginCheck()` のどちらを呼ぶかで決まると理解したか。prodで origin を渡し忘れた場合は `ProdModule` が boot時に落ちる。
 
 ## Source
 
@@ -207,6 +230,8 @@ attribute → interceptor → module の対応が名前で追える:
 - [`src-csrf/CsrfModule.php`](../src-csrf/CsrfModule.php)
 - [`src-csrf/SessionCsrfToken.php`](../src-csrf/SessionCsrfToken.php)
 - [`src/Module/AppModule.php`](../src/Module/AppModule.php)
+- [`src/Module/ProdModule.php`](../src/Module/ProdModule.php)
+- [`src/Exception/MissingAllowedOriginException.php`](../src/Exception/MissingAllowedOriginException.php)
 
 ## Tests
 
@@ -222,7 +247,8 @@ attribute → interceptor → module の対応が名前で追える:
 
 ## Do not
 
-- prodで `CMS_ALLOWED_ORIGIN` 未設定のまま公開しない — `AllowedOrigin` が `null` だと両interceptorとも素通し（dev/CLI/test用スイッチ）になる。エラーにはならず、静かに無防備になる。
+- 欠落トークンを interceptor 側で握り潰さない — `verify()` に `''` として渡し、受理可否は束縛された `CsrfTokenInterface` に決めさせる。ここで短絡すると、CSRFが主題でないテスト用の寛容な実装を束縛できなくなり、消費者は interceptor ごと置き換えることになる。
+- 設定値の欠落で防御が静かに外れる形にしない — 「検証しない」は `withoutSameOriginCheck()` という**書かなければ起きない**選択として表す。env の設定を運用者の記憶に委ねる設計は、同カテゴリの [`admin-auth-boundary`](admin-auth-boundary.md)（「認証境界は型で表現する」）と矛盾する。
 
 ## マスター確認（After）
 

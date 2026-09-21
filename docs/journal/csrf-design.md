@@ -118,11 +118,16 @@ benefit. Tying both gates to the same on/off knob keeps the mental
 model "production HTTP enforces, everywhere else skips" in one
 config value.
 
-**Production gotcha.** Because `null` means "skip", a production HTTP
-deployment that forgets to set `CMS_ALLOWED_ORIGIN` silently disables
-both gates. The fail-closed path belongs in a `ProdModule` that aborts
-at boot if the env var is missing — out of scope for this PR. Tracked
-under [docs/scope.md](../scope.md) Tier 2 "Production tuning notes".
+**Production gotcha — resolved.** `null` means "no origin to compare
+against", which is the right answer for CLI and development but would
+stand the same-origin gate down for every request in production. It is
+therefore no longer reachable by omission: `CsrfModule`'s constructor is
+private and the choice is made by calling `withSameOriginCheck()` or
+`withoutSameOriginCheck()`, and `ProdModule` throws
+`MissingAllowedOriginException` at boot when `CMS_ALLOWED_ORIGIN` is
+unset. The token gate never depended on this value in the first place —
+that coupling was removed at the same time, so a missing origin can no
+longer disable token verification as a side effect.
 
 ### What this layer doesn't do
 
