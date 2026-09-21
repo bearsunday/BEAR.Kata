@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace BEAR\Kata\Interceptor;
 
+use BEAR\Csrf\Exception\ForbiddenException;
 use BEAR\Kata\Auth\Visitor;
 use BEAR\Kata\Fake\FakeUserModule;
 use BEAR\Kata\Injector;
 use BEAR\Resource\ResourceInterface;
 use PHPUnit\Framework\TestCase;
-use Ray\Csrf\Exception\ForbiddenException;
 
 /**
  * One end-to-end wiring check that `#[CsrfToken]` actually fires when

@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "081db383b35408d372521df75230944d",
+    "content-hash": "092fce7dbd1373d311a7ab1caeee90f3",
     "packages": [
         {
             "name": "aura/cli",
@@ -410,6 +410,135 @@
                 "source": "https://github.com/bearsunday/BEAR.Async/tree/0.3.0"
             },
             "time": "2026-05-13T13:10:05+00:00"
+        },
+        {
+            "name": "bear/csrf",
+            "version": "0.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/bearsunday/BEAR.Csrf.git",
+                "reference": "08117046997b6e7ad58ee11ef27ceca1fd51d812"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/bearsunday/BEAR.Csrf/zipball/08117046997b6e7ad58ee11ef27ceca1fd51d812",
+                "reference": "08117046997b6e7ad58ee11ef27ceca1fd51d812",
+                "shasum": ""
+            },
+            "require": {
+                "bear/resource": "^1.32",
+                "ext-session": "*",
+                "php": "^8.2",
+                "ray/aop": "^2.18",
+                "ray/di": "^2.18"
+            },
+            "require-dev": {
+                "bamarni/composer-bin-plugin": "^1.8",
+                "phpunit/phpunit": "^10.5"
+            },
+            "type": "library",
+            "extra": {
+                "bamarni-bin": {
+                    "bin-links": true,
+                    "forward-command": true
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "BEAR\\Csrf\\": "src/"
+                }
+            },
+            "autoload-dev": {
+                "psr-4": {
+                    "BEAR\\Csrf\\": [
+                        "tests",
+                        "tests/Fake"
+                    ]
+                }
+            },
+            "scripts": {
+                "bin": [
+                    "echo 'bin not installed'"
+                ],
+                "test": [
+                    "phpunit"
+                ],
+                "coverage": [
+                    "php -dzend_extension=xdebug.so -dxdebug.mode=coverage phpunit --coverage-text --coverage-html=build/coverage"
+                ],
+                "phpdbg": [
+                    "phpdbg -qrr phpunit --coverage-text --coverage-html ./build/coverage --coverage-clover=build/coverage.xml"
+                ],
+                "pcov": [
+                    "php -dextension=pcov.so -d pcov.enabled=1 phpunit --coverage-text --coverage-html=build/coverage --coverage-clover=build/coverage.xml"
+                ],
+                "cs": [
+                    "phpcs"
+                ],
+                "cs-fix": [
+                    "phpcbf src tests"
+                ],
+                "phpstan": [
+                    "phpstan analyse -c phpstan.neon"
+                ],
+                "psalm": [
+                    "psalm --show-info=false"
+                ],
+                "phpmd": [
+                    "phpmd analyze src --format=text --ruleset=phpmd.xml"
+                ],
+                "baseline": [
+                    "phpstan analyse -c phpstan.neon --generate-baseline --allow-empty-baseline && psalm --set-baseline=psalm-baseline.xml"
+                ],
+                "crc": [
+                    "composer-require-checker check ./composer.json"
+                ],
+                "metrics": [
+                    "phpmetrics --report-html=build/metrics --exclude=Exception src"
+                ],
+                "clean": [
+                    "phpstan clear-result-cache",
+                    "psalm --clear-cache"
+                ],
+                "sa": [
+                    "@phpstan",
+                    "@psalm"
+                ],
+                "tests": [
+                    "@cs",
+                    "@sa",
+                    "@test"
+                ],
+                "build": [
+                    "@clean",
+                    "@cs",
+                    "@sa",
+                    "@coverage",
+                    "@crc",
+                    "@metrics"
+                ],
+                "post-install-cmd": [
+                    "@composer bin all install --ansi"
+                ],
+                "post-update-cmd": [
+                    "@composer bin all update --ansi"
+                ]
+            },
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Akihito Koriyama",
+                    "email": "akihito.koriyama@gmail.com"
+                }
+            ],
+            "description": "CSRF protection for BEAR.Sunday",
+            "support": {
+                "source": "https://github.com/bearsunday/BEAR.Csrf/tree/0.1.0",
+                "issues": "https://github.com/bearsunday/BEAR.Csrf/issues"
+            },
+            "time": "2026-09-21T14:06:29+00:00"
         },
         {
             "name": "bear/package",
@@ -4357,60 +4486,6 @@
                 "source": "https://github.com/ray-di/Ray.Compiler/tree/1.13.1"
             },
             "time": "2025-12-04T08:40:43+00:00"
-        },
-        {
-            "name": "ray/csrf",
-            "version": "0.1.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/ray-di/Ray.Csrf.git",
-                "reference": "0e273aef6196eeac0c4376924d50b70a47a639cc"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/ray-di/Ray.Csrf/zipball/0e273aef6196eeac0c4376924d50b70a47a639cc",
-                "reference": "0e273aef6196eeac0c4376924d50b70a47a639cc",
-                "shasum": ""
-            },
-            "require": {
-                "bear/resource": "^1.32",
-                "ext-session": "*",
-                "php": "^8.2",
-                "ray/aop": "^2.18",
-                "ray/di": "^2.18"
-            },
-            "require-dev": {
-                "bamarni/composer-bin-plugin": "^1.8",
-                "phpunit/phpunit": "^10.5"
-            },
-            "type": "library",
-            "extra": {
-                "bamarni-bin": {
-                    "bin-links": true,
-                    "forward-command": true
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "Ray\\Csrf\\": "src/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Akihito Koriyama",
-                    "email": "akihito.koriyama@gmail.com"
-                }
-            ],
-            "description": "CSRF protection module for Ray.Di / BEAR.Resource applications",
-            "support": {
-                "issues": "https://github.com/ray-di/Ray.Csrf/issues",
-                "source": "https://github.com/ray-di/Ray.Csrf/tree/0.1.0"
-            },
-            "time": "2026-09-21T13:17:59+00:00"
         },
         {
             "name": "ray/di",

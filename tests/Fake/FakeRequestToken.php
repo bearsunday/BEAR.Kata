@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace BEAR\Kata\Fake;
 
+use BEAR\Csrf\Http\CsrfTokenField;
+use BEAR\Csrf\Http\RequestTokenInterface;
 use Override;
 use Ray\Aop\MethodInvocation;
-use Ray\Csrf\Http\CsrfTokenField;
-use Ray\Csrf\Http\RequestTokenInterface;
 
 /** Scripts what the request carried, so a test can drive the gate without a real submission. */
 final readonly class FakeRequestToken implements RequestTokenInterface

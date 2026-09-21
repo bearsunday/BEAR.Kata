@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace BEAR\Kata\Fake;
 
+use BEAR\Csrf\CsrfTokenInterface;
 use Override;
-use Ray\Csrf\CsrfTokenInterface;
 
 use function hash_equals;
 

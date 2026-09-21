@@ -1,18 +1,18 @@
 # `csrf-same-origin-protection`
 
-**`ray/csrf` をAdmin境界に組み込む** · [← 索引に戻る](../index.md)
+**`bear/csrf` をAdmin境界に組み込む** · [← 索引に戻る](../index.md)
 
 - **Category:** Runtime / representation
 - **Status:** `canonical`
-- **Aliases:** CSRF, CsrfToken, SameOrigin, interceptor, AOP, form protection, synchronizer token, シンクロナイザートークン, CSRF対策, Ray.Csrf, _csrf_token, Sec-Fetch-Site
+- **Aliases:** CSRF, CsrfToken, SameOrigin, interceptor, AOP, form protection, synchronizer token, シンクロナイザートークン, CSRF対策, BEAR.Csrf, _csrf_token, Sec-Fetch-Site
 - **Manual:** https://bearsunday.github.io/manuals/1.0/en/security.html
-- **Library:** [`ray/csrf`](https://github.com/ray-di/Ray.Csrf) — 仕組みはこちら。この kata は組み込み側だけを扱う。
+- **Library:** [`bear/csrf`](https://github.com/bearsunday/BEAR.Csrf) — 仕組みはこちら。この kata は組み込み側だけを扱う。
 - **Use when:** Admin Page Resourceのwrite操作をCSRF攻撃とCross-Site Origin攻撃から保護したい。
 
 ## 例
 
 CSRF の仕組み — synchronizer token、`hash_equals`、`Sec-Fetch-Site` / `Origin` / `Referer`
-の優先順位 — は [`ray/csrf`](https://github.com/ray-di/Ray.Csrf) が持つ。この kata が扱うのは
+の優先順位 — は [`bear/csrf`](https://github.com/bearsunday/BEAR.Csrf) が持つ。この kata が扱うのは
 **それを BEAR application の境界にどう据えるか**だけで、実装は再掲しない。
 
 ### どちらの門を arm するか
@@ -96,7 +96,7 @@ foreach ($this->unsafeMethods() as [$class, $method]) {
 同梱の `SessionCsrfToken` は `$_SESSION` に依存する — process が request を所有する host
 (PHP-FPM、built-in server、CLI) が前提。Swoole のような coroutine host では worker 単位で
 token が共有され防御が成立しないため、`CoroutineUnsafeStoreException` で拒否される
-([Ray.Csrf#7](https://github.com/ray-di/Ray.Csrf/issues/7))。並行 host に載せるなら
+([BEAR.Csrf#7](https://github.com/bearsunday/BEAR.Csrf/issues/7))。並行 host に載せるなら
 `CsrfTokenInterface` を request scope の store に束縛し直す。
 
 ## Naming
@@ -114,7 +114,7 @@ attribute → interceptor → module の対応が名前で追える:
 
 ## 着手前チェック（Before）
 
-- [ ] CSRF の実装ではなく、`ray/csrf` の**組み込み**が主題だと理解したか。token 生成・`hash_equals`・origin 解析は library 側にある。
+- [ ] CSRF の実装ではなく、`bear/csrf` の**組み込み**が主題だと理解したか。token 生成・`hash_equals`・origin 解析は library 側にある。
 - [ ] 門を掛けるのは browser が触る Page/Admin であって、CLI や内部requestから到達する App resource ではないと理解したか。
 - [ ] token 門と same-origin 門は独立で、後者は `withSameOriginCheck()` / `withoutSameOriginCheck()` のどちらを呼ぶかで決まると理解したか。prod での欠落は `ProdModule` が boot時に落とす。
 - [ ] attribute の付け忘れは library が検出できない consumer 側の穴で、application が test で塞ぐと理解したか。
@@ -122,7 +122,7 @@ attribute → interceptor → module の対応が名前で追える:
 
 ## Source
 
-application が所有する部分のみ。library は [`ray/csrf`](https://github.com/ray-di/Ray.Csrf):
+application が所有する部分のみ。library は [`bear/csrf`](https://github.com/bearsunday/BEAR.Csrf):
 
 - [`src/Module/AppModule.php`](../src/Module/AppModule.php) — どちらの門を arm するか
 - [`src/Module/ProdModule.php`](../src/Module/ProdModule.php) — prod の fail-closed
@@ -151,11 +151,11 @@ reflection で検出する — library には見えない穴で、ここが appl
 
 ## Do not
 
-- CSRF の仕組みを自前で書かない — token 生成も `hash_equals` も origin 解析も `ray/csrf` にある。security code の複製は、複製された分だけ review を受けない実装が増えるということ。
+- CSRF の仕組みを自前で書かない — token 生成も `hash_equals` も origin 解析も `bear/csrf` にある。security code の複製は、複製された分だけ review を受けない実装が増えるということ。
 - App resource に門を付けない — CLI・seed・内部requestから到達するので、攻撃ではなく正当な呼び出しを塞ぐ。browser 境界は Page。
 - 設定値の欠落で防御が静かに外れる形にしない — 「検証しない」は `withoutSameOriginCheck()` という**書かなければ起きない**選択として表す。ただし module API がそう書けても composition root が env から導出するなら欠落は防げない。落とすのは `ProdModule` の役割。
 - attribute の付け忘れを library に期待しない — 付いていない method は interceptor の視界に入らない。網羅は application の test で保証する。
-- **coroutine hostにそのまま持ち込まない** — 同梱の `SessionCsrfToken` は `$_SESSION` 依存で、Swooleのようにworker内で複数requestが並行する環境ではtokenがworker単位で共有され防御が成立しない([Ray.Csrf#7](https://github.com/ray-di/Ray.Csrf/issues/7)、未解決)。並行hostでは `CsrfTokenInterface` をrequest scopeのstoreに束縛し直す。
+- **coroutine hostにそのまま持ち込まない** — 同梱の `SessionCsrfToken` は `$_SESSION` 依存で、Swooleのようにworker内で複数requestが並行する環境ではtokenがworker単位で共有され防御が成立しない([BEAR.Csrf#7](https://github.com/bearsunday/BEAR.Csrf/issues/7)、未解決)。並行hostでは `CsrfTokenInterface` をrequest scopeのstoreに束縛し直す。
 
 ## マスター確認（After）
 
@@ -165,7 +165,7 @@ reflection で検出する — library には見えない穴で、ここが appl
 - [ ] renderer が全 template に token と field 名を供給し、logout で `clear()` される。
 
 green が意味するのは「この構成で組み込み側の義務が満たされている」ことであって、
-CSRF 防御そのものの証明ではない。後者は `ray/csrf` の test が持つ。
+CSRF 防御そのものの証明ではない。後者は `bear/csrf` の test が持つ。
 
 ## See also
 

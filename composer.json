@@ -6,6 +6,10 @@
     "repositories": [
         {
             "type": "vcs",
+            "url": "https://github.com/bearsunday/BEAR.Csrf"
+        },
+        {
+            "type": "vcs",
             "url": "https://github.com/bearsunday/BEAR.Resource"
         }
     ],
@@ -25,7 +29,7 @@
         "qiq/qiq": "^3.0",
         "ray/aop": "^2.12",
         "ray/aura-sql-module": "^1.17",
-        "ray/csrf": "^0.1",
+        "bear/csrf": "^0.1",
         "ray/di": "^2.14",
         "ray/input-query": "^1.0",
         "ray/media-query": "^1.1"
