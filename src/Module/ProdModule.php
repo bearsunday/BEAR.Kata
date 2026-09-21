@@ -33,6 +33,9 @@ final class ProdModule extends AbstractModule
     #[Override]
     protected function configure(): void
     {
+        // Two environment variables, two deliberately different answers to "unset".
+        // An absent origin disarms a security control for every request, so production
+        // refuses to boot rather than serve unprotected.
         $allowedOrigin = getenv(self::ALLOWED_ORIGIN_ENV);
         if ($allowedOrigin === false || $allowedOrigin === '') {
             throw new MissingAllowedOriginException(self::ALLOWED_ORIGIN_ENV);
@@ -40,6 +43,9 @@ final class ProdModule extends AbstractModule
 
         $this->install(new PackageProdModule());
 
+        // An absent Redis DSN only costs the shared cache: the local storage
+        // PackageProdModule already bound stays correct, so this one is an opt-in and
+        // skipping it is the right answer.
         $redisDsn = getenv('CMS_REDIS_DSN');
         if ($redisDsn === false || $redisDsn === '') {
             return;
