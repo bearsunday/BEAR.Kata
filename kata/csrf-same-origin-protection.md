@@ -136,6 +136,7 @@ application が所有する部分のみ。library は [`ray/csrf`](https://githu
 - [`tests/Interceptor/CsrfTokenWiringTest.php`](../tests/Interceptor/CsrfTokenWiringTest.php) — 宣言が injector 経由で実際に interception になるか
 - [`tests/Interceptor/SameOriginWiringTest.php`](../tests/Interceptor/SameOriginWiringTest.php)
 - [`tests/Interceptor/AdminPageCsrfAttributeCoverageTest.php`](../tests/Interceptor/AdminPageCsrfAttributeCoverageTest.php) — 付け忘れ検出
+- [`tests/Interceptor/ProdCsrfBootTest.php`](../tests/Interceptor/ProdCsrfBootTest.php) — origin 未設定で prod が boot に失敗する
 
 interceptor 単体の挙動 (signal 優先順位、malformed origin、token 比較) は library 側の
 test が持つ。ここで再実装すると、同じ契約の記述が二つになって必ずずれる。
