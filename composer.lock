@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "16d9ac6b0e6badd854fee9668de9468b",
+    "content-hash": "081db383b35408d372521df75230944d",
     "packages": [
         {
             "name": "aura/cli",
@@ -4360,16 +4360,16 @@
         },
         {
             "name": "ray/csrf",
-            "version": "1.x-dev",
+            "version": "0.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/ray-di/Ray.Csrf.git",
-                "reference": "2753dca8aff4741bf85618233b544d01f773e0f7"
+                "reference": "0e273aef6196eeac0c4376924d50b70a47a639cc"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/ray-di/Ray.Csrf/zipball/2753dca8aff4741bf85618233b544d01f773e0f7",
-                "reference": "2753dca8aff4741bf85618233b544d01f773e0f7",
+                "url": "https://api.github.com/repos/ray-di/Ray.Csrf/zipball/0e273aef6196eeac0c4376924d50b70a47a639cc",
+                "reference": "0e273aef6196eeac0c4376924d50b70a47a639cc",
                 "shasum": ""
             },
             "require": {
@@ -4383,7 +4383,6 @@
                 "bamarni/composer-bin-plugin": "^1.8",
                 "phpunit/phpunit": "^10.5"
             },
-            "default-branch": true,
             "type": "library",
             "extra": {
                 "bamarni-bin": {
@@ -4409,9 +4408,9 @@
             "description": "CSRF protection module for Ray.Di / BEAR.Resource applications",
             "support": {
                 "issues": "https://github.com/ray-di/Ray.Csrf/issues",
-                "source": "https://github.com/ray-di/Ray.Csrf/tree/1.x"
+                "source": "https://github.com/ray-di/Ray.Csrf/tree/0.1.0"
             },
-            "time": "2026-09-21T11:58:45+00:00"
+            "time": "2026-09-21T13:17:59+00:00"
         },
         {
             "name": "ray/di",
@@ -10062,7 +10061,6 @@
     "stability-flags": {
         "bear/event-sourcing": 20,
         "bear/resource": 20,
-        "ray/csrf": 20,
         "roave/security-advisories": 20
     },
     "prefer-stable": false,
