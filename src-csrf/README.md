@@ -2,7 +2,7 @@
 
 CSRF defence stack for BEAR.Sunday applications. Lives in this
 repository under `src-csrf/` until it is published as the
-`ray/csrf-module` Composer package.
+`ray/csrf` Composer package.
 
 ## Surface
 
@@ -61,7 +61,7 @@ test layout.
 
 ## Upstream migration
 
-When `ray/csrf-module` is published:
+When `ray/csrf` is published:
 
 1. Delete `src-csrf/` and `tests-csrf/`.
 2. Remove the `Ray\\Csrf\\` entries from `composer.json` `autoload`
@@ -70,8 +70,17 @@ When `ray/csrf-module` is published:
    `psalm.xml`, the `phpmd` composer script paths, and the PHPUnit
    `<source>` section.
 4. Drop the `csrf` testsuite from `phpunit.xml.dist`.
-5. Add `ray/csrf-module` to `composer.json` `require`.
+5. Add `ray/csrf` to `composer.json` `require`.
 6. Clear the DI cache: `rm -rf var/tmp/*-hal-app var/tmp/*-hal-api-app`.
 
-Consumer `use` statements stay unchanged — the namespace is the
-contract.
+The shared namespace is not by itself a drop-in guarantee: the two
+copies evolved apart while both were maintained. As of `ray/csrf`
+`9cf4ae6` the token-source port differs — this copy has
+`RequestBodyTokenInterface` / `ServerRequestBodyToken` reading `$_POST`,
+upstream has an invocation-aware `RequestTokenInterface` with header,
+`uri->query` and `$_POST` adapters tried in that order. Code naming the
+port has to move with it; code naming only the attributes, `CsrfModule`,
+`CsrfTokenInterface` and the exceptions does not.
+
+Check the upstream README for the current surface before migrating
+rather than assuming this directory describes it.
