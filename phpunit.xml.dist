@@ -29,6 +29,9 @@
     <testsuite name="provide">
       <directory>tests/Provide</directory>
     </testsuite>
+    <testsuite name="provider">
+      <directory>tests/Provider</directory>
+    </testsuite>
     <testsuite name="service">
       <directory>tests/Service</directory>
     </testsuite>
