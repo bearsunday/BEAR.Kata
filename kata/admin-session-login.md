@@ -170,6 +170,7 @@ login / callback / logout は別Page Resourceに分け、URLと1対1にする（
 - [ ] CSRF/replay対策として `issueState()` → `consumeState()`（one-time消費 + `hash_equals` 比較）のstate検証を入れると決めたか。
 - [ ] 外部identityを `(provider, subject) → authorId` でマッピングし、emailは初回ログインのfallbackのみと理解したか。
 - [ ] logoutはGETでなくPOST（`#[SameOrigin]` + `#[CsrfToken]`）にすると決めたか。
+- [ ] login / logout で `session_regenerate_id(true)` と CSRF token の `clear()` を行う（session fixation 対策）と理解したか。
 
 ## Source
 
@@ -183,10 +184,11 @@ login / callback / logout は別Page Resourceに分け、URLと1対1にする（
 
 - [`tests/Resource/Page/Admin/LoginTest.php`](../tests/Resource/Page/Admin/LoginTest.php)
 - [`tests/Service/AuthorIdentityResolverTest.php`](../tests/Service/AuthorIdentityResolverTest.php)
+- [`tests/Service/NativeAuthSessionTest.php`](../tests/Service/NativeAuthSessionTest.php) — login / logout での session id 再生成と token 破棄
 
 ## Key points
 
-Loginは `issueState()` → 302（authorization URL）。Callbackはstate検証失敗/認証失敗で401（provider内部を漏らさない）、author未解決は403、成功で `session->login()` → 303 `/admin/index`。identity mappingは初回のみ `auth_identity_add` され、同一subjectの再ログインで重複作成しない。LogoutはGET=405、POST=303。
+Loginは `issueState()` → 302（authorization URL）。Callbackはstate検証失敗/認証失敗で401（provider内部を漏らさない）、author未解決は403、成功で `session->login()` → 303 `/admin/index`。identity mappingは初回のみ `auth_identity_add` され、同一subjectの再ログインで重複作成しない。LogoutはGET=405、POST=303。`login()` / `logout()` はどちらも `session_regenerate_id(true)` と CSRF token の `clear()` を行い、認証前の session id と token を持ち越さない。
 
 ## Do not
 

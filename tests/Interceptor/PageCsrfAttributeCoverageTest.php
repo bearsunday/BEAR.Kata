@@ -7,29 +7,35 @@ namespace BEAR\Kata\Interceptor;
 use BEAR\Csrf\Attribute\CsrfToken;
 use BEAR\Csrf\Attribute\SameOrigin;
 use PHPUnit\Framework\TestCase;
+use RecursiveDirectoryIterator;
+use RecursiveIteratorIterator;
 use ReflectionAttribute;
 use ReflectionClass;
 use ReflectionMethod;
+use SplFileInfo;
 
 use function array_map;
 use function array_merge;
-use function basename;
+use function assert;
 use function class_exists;
-use function glob;
+use function sort;
 use function sprintf;
+use function str_replace;
+use function strlen;
+use function substr;
 
 /**
- * Enforces that every unsafe HTTP verb on `Page/Admin/*` carries both
+ * Enforces that every unsafe HTTP verb on a Page resource carries both
  * `#[SameOrigin]` and `#[CsrfToken]` — closes the "you added a new
- * admin POST and forgot the attribute" gap that the wiring tests
- * can't catch. The wiring tests prove the interceptors fire when the
+ * POST and forgot the attribute" gap that the wiring tests can't
+ * catch. The wiring tests prove the interceptors fire when the
  * attributes are present; this one proves the attributes are
  * actually present everywhere they need to be.
  *
- * Discovers admin Page resources from disk and walks the unsafe verbs
- * (`onPost`, `onPut`, `onDelete`, `onPatch`). A new admin Page or a
- * new unsafe method is picked up automatically — no test edit
- * required to keep coverage in sync.
+ * Walks `src/Resource/Page` recursively — the browser boundary is Page,
+ * not just Page/Admin, and a resource in a subdirectory must not fall
+ * out of coverage silently. A new Page or a new unsafe method is picked
+ * up automatically — no test edit required to keep coverage in sync.
  *
  * Two intentional exclusions:
  *
@@ -41,14 +47,14 @@ use function sprintf;
  *    currently exposes only `onGet`, so it doesn't surface here
  *    anyway, but the docblock pins the reasoning.
  */
-final class AdminPageCsrfAttributeCoverageTest extends TestCase
+final class PageCsrfAttributeCoverageTest extends TestCase
 {
-    private const string ADMIN_PAGE_DIR = __DIR__ . '/../../src/Resource/Page/Admin';
-    private const string ADMIN_PAGE_NAMESPACE = 'BEAR\\Kata\\Resource\\Page\\Admin\\';
+    private const string PAGE_DIR = __DIR__ . '/../../src/Resource/Page';
+    private const string PAGE_NAMESPACE = 'BEAR\\Kata\\Resource\\Page\\';
     private const array UNSAFE_VERBS = ['onPost', 'onPut', 'onDelete', 'onPatch'];
 
-    /** @dataProvider unsafeAdminMethodProvider */
-    public function testUnsafeAdminMethodHasSameOriginAndCsrfToken(string $class, string $method): void
+    /** @dataProvider unsafePageMethodProvider */
+    public function testUnsafePageMethodHasSameOriginAndCsrfToken(string $class, string $method): void
     {
         $names = $this->attributeNames(new ReflectionMethod($class, $method));
 
@@ -56,8 +62,8 @@ final class AdminPageCsrfAttributeCoverageTest extends TestCase
             SameOrigin::class,
             $names,
             sprintf(
-                '%s::%s is an unsafe admin verb but is missing #[SameOrigin]. '
-                . 'Either annotate it or move the resource out of Page/Admin if the gate genuinely should not apply.',
+                '%s::%s is an unsafe Page verb but is missing #[SameOrigin]. '
+                . 'Either annotate it or move the resource out of Page if the gate genuinely should not apply.',
                 $class,
                 $method,
             ),
@@ -67,7 +73,7 @@ final class AdminPageCsrfAttributeCoverageTest extends TestCase
             CsrfToken::class,
             $names,
             sprintf(
-                '%s::%s is an unsafe admin verb but is missing #[CsrfToken]. '
+                '%s::%s is an unsafe Page verb but is missing #[CsrfToken]. '
                 . 'Either annotate it or revisit the threat model for this surface.',
                 $class,
                 $method,
@@ -76,15 +82,9 @@ final class AdminPageCsrfAttributeCoverageTest extends TestCase
     }
 
     /** @return iterable<string, array{class-string, string}> */
-    public static function unsafeAdminMethodProvider(): iterable
+    public static function unsafePageMethodProvider(): iterable
     {
-        $files = glob(self::ADMIN_PAGE_DIR . '/*.php') ?: [];
-        foreach ($files as $file) {
-            $class = self::ADMIN_PAGE_NAMESPACE . basename($file, '.php');
-            if (! class_exists($class)) {
-                continue;
-            }
-
+        foreach (self::pageClasses() as $class) {
             $reflection = new ReflectionClass($class);
             foreach (self::UNSAFE_VERBS as $verb) {
                 if (! $reflection->hasMethod($verb)) {
@@ -94,6 +94,31 @@ final class AdminPageCsrfAttributeCoverageTest extends TestCase
                 yield sprintf('%s::%s', $class, $verb) => [$class, $verb];
             }
         }
+    }
+
+    /** @return list<class-string> */
+    private static function pageClasses(): array
+    {
+        $classes = [];
+        $files = new RecursiveIteratorIterator(new RecursiveDirectoryIterator(self::PAGE_DIR));
+        foreach ($files as $file) {
+            assert($file instanceof SplFileInfo);
+            if ($file->getExtension() !== 'php') {
+                continue;
+            }
+
+            $relative = substr($file->getPathname(), strlen(self::PAGE_DIR) + 1, -strlen('.php'));
+            $class = self::PAGE_NAMESPACE . str_replace('/', '\\', $relative);
+            if (! class_exists($class)) {
+                continue;
+            }
+
+            $classes[] = $class;
+        }
+
+        sort($classes);
+
+        return $classes;
     }
 
     /** @return list<string> */
