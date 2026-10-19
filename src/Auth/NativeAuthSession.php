@@ -12,6 +12,7 @@ use function is_array;
 use function is_int;
 use function is_string;
 use function random_bytes;
+use function session_regenerate_id;
 use function session_start;
 use function session_status;
 
@@ -68,6 +69,7 @@ final class NativeAuthSession implements AuthSessionInterface
     public function login(AuthenticatedUser $user, int $authorId): void
     {
         $this->start();
+        $this->rotate();
         $_SESSION[self::USER] = [
             'id' => $user->id,
             'email' => $user->email,
@@ -80,7 +82,7 @@ final class NativeAuthSession implements AuthSessionInterface
     {
         $this->start();
         unset($_SESSION[self::USER], $_SESSION[self::STATE]);
-        $this->csrf->clear();
+        $this->rotate();
     }
 
     private function start(): void
@@ -90,6 +92,16 @@ final class NativeAuthSession implements AuthSessionInterface
         }
 
         session_start();
+    }
+
+    /**
+     * A session id and token minted before the authentication change must not
+     * survive it: a fixated session or a leaked token would otherwise carry over.
+     */
+    private function rotate(): void
+    {
+        session_regenerate_id(true);
+        $this->csrf->clear();
     }
 
     /** @param array<array-key, mixed> $user */
