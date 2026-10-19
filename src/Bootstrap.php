@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace BEAR\Kata;
 
+use BEAR\Kata\Auth\SessionCookie;
 use BEAR\Kata\Module\App;
 use BEAR\Resource\ResourceObject;
 use BEAR\Sunday\Extension\Application\AppInterface;
@@ -26,6 +27,7 @@ final class Bootstrap
      */
     public function __invoke(string $context, array $globals, array $server): int
     {
+        (new SessionCookie())->configure($server);
         $app = Injector::getInstance($context)->getInstance(AppInterface::class);
         assert($app instanceof App);
         if ($app->httpCache->isNotModified($server)) {
