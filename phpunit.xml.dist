@@ -32,6 +32,9 @@
     <testsuite name="provider">
       <directory>tests/Provider</directory>
     </testsuite>
+    <testsuite name="renderer">
+      <directory>tests/Renderer</directory>
+    </testsuite>
     <testsuite name="service">
       <directory>tests/Service</directory>
     </testsuite>

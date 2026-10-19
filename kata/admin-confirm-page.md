@@ -114,7 +114,7 @@ private function previewBody(Article $article, array $errors, bool $alreadyPubli
 <?php else: ?>
   <form class="PublishForm" method="post" action="/admin/articleconfirm">
     <input type="hidden" name="id" value="{{a $article->id }}">
-    <input type="hidden" name="{{h $csrfTokenField }}" value="{{h $csrfToken }}">
+    {{= csrfField() }}
     <button type="submit" class="doPublishArticle">Publish article</button>
     <a href="/admin/article?id={{h $article->id }}" class="doUpdateArticle">Back to edit</a>
   </form>
