@@ -7,14 +7,22 @@ namespace BEAR\Kata\Provider;
 use Auth0\SDK\Auth0;
 use Auth0\SDK\Configuration\SdkConfiguration;
 use Auth0\SDK\Contract\Auth0Interface;
+use BEAR\Kata\Auth\RequestScheme;
 use BEAR\Kata\Exception\MissingAuth0ConfigurationException;
 use Ray\Di\ProviderInterface;
 
 use function getenv;
 
-/** @implements ProviderInterface<Auth0Interface> */
+/**
+ * @implements ProviderInterface<Auth0Interface>
+ * @SuppressWarnings("PHPMD.Superglobals") The request is not in the DI graph; the provider reads it at the boundary.
+ */
 final class Auth0Provider implements ProviderInterface
 {
+    public function __construct(private readonly RequestScheme $scheme)
+    {
+    }
+
     public function get(): Auth0Interface
     {
         $config = $this->requiredEnv();
@@ -28,6 +36,7 @@ final class Auth0Provider implements ProviderInterface
             audience: $audience === null ? null : [$audience],
             scope: ['openid', 'email', 'profile'],
             cookieSecret: $config['cookieSecret'],
+            cookieSecure: $this->scheme->isHttps($_SERVER, $this->env('CMS_ALLOWED_ORIGIN')),
             queryUserInfo: true,
         ));
     }

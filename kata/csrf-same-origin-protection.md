@@ -93,7 +93,8 @@ navigation で、login state を持つ cookie をそこで受け取る必要が�
 `Secure` は request が HTTPS か、`CMS_ALLOWED_ORIGIN` の scheme が `https` なら付く。proxy が TLS を終端する構成では
 PHP の見る request は plain HTTP で `$_SERVER['HTTPS']` が立たないため、request の scheme だけを
 見ると production の cookie から `Secure` が静かに落ちる。same-origin 門に渡す public origin は
-その事実を既に持っているので、cookie も同じ値から決める。
+その事実を既に持っているので、cookie も同じ値から決める。Auth0 SDK 自身の cookie
+(`auth0_session*` / `auth0_transient*`) も、`Auth0Provider` が同じ `RequestScheme` で `cookieSecure` を決める。
 
 ### 認証状態が変わったら session id と token を回す
 
@@ -176,6 +177,7 @@ application が所有する部分のみ。library は [`bear/csrf`](https://gith
 - [`src/Module/AppModule.php`](../src/Module/AppModule.php) — どちらの門を arm するか
 - [`src/Module/ProdModule.php`](../src/Module/ProdModule.php) — prod の fail-closed
 - [`src/Bootstrap.php`](../src/Bootstrap.php) / [`src/Auth/SessionCookie.php`](../src/Auth/SessionCookie.php) — 最初の `session_start()` より前の cookie 属性
+- [`src/Auth/RequestScheme.php`](../src/Auth/RequestScheme.php) — `Secure` の判定。session cookie と Auth0 SDK の cookie が共有する
 - [`src/Exception/MissingAllowedOriginException.php`](../src/Exception/MissingAllowedOriginException.php)
 - [`src/Renderer/CmsQiqRenderer.php`](../src/Renderer/CmsQiqRenderer.php) — token と field 名の view 供給
 - [`src/Resource/Page/Admin/Article.php`](../src/Resource/Page/Admin/Article.php) — attribute の置き場
@@ -190,6 +192,8 @@ application が所有する部分のみ。library は [`bear/csrf`](https://gith
 - [`tests/Interceptor/ProdCsrfBootTest.php`](../tests/Interceptor/ProdCsrfBootTest.php) — origin 未設定で prod が boot に失敗する
 - [`tests/Service/NativeAuthSessionTest.php`](../tests/Service/NativeAuthSessionTest.php) — login / logout で session id が変わり `clear()` が呼ばれる。回せなければ login が中断する
 - [`tests/Service/SessionCookieTest.php`](../tests/Service/SessionCookieTest.php) — cookie 属性が session 開始前に決まる。開始後なら拒否する
+- [`tests/Service/RequestSchemeTest.php`](../tests/Service/RequestSchemeTest.php) — public origin と `$_SERVER['HTTPS']` からの `Secure` 判定
+- [`tests/Provider/Auth0ProviderTest.php`](../tests/Provider/Auth0ProviderTest.php) — Auth0 SDK の cookie にも同じ判定が渡る
 
 interceptor 単体の挙動 (signal 優先順位、malformed origin、token 比較) は library 側の
 test が持つ。ここで再実装すると、同じ契約の記述が二つになって必ずずれる。
