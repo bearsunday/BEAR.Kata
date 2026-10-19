@@ -14,6 +14,7 @@ use BEAR\Kata\Auth\AuthorIdentityResolver;
 use BEAR\Kata\Auth\AuthSessionInterface;
 use BEAR\Kata\Auth\GoogleAuthProvider;
 use BEAR\Kata\Auth\NativeAuthSession;
+use BEAR\Kata\Auth\RequestScheme;
 use BEAR\Kata\Auth\UserInterface;
 use BEAR\Kata\Exception\InvalidAuthProviderException;
 use BEAR\Kata\Factory\ArticleFactory;
@@ -97,6 +98,8 @@ final class AppModule extends AbstractAppModule
 
         // Authentication: Google OAuth by default; Auth0/OIDC is selected with CMS_AUTH_PROVIDER=auth0.
         $this->bind(Google::class)->toProvider(GoogleProvider::class)->in(Scope::SINGLETON);
+        // Explicit binding so Ray.Compiler can resolve Auth0Provider's constructor argument.
+        $this->bind(RequestScheme::class)->in(Scope::SINGLETON);
         $this->bind(Auth0Interface::class)->toProvider(Auth0Provider::class)->in(Scope::SINGLETON);
         $authProvider = strtolower(trim((string) getenv('CMS_AUTH_PROVIDER')));
         if (! in_array($authProvider, ['', 'google', 'auth0'], true)) {
