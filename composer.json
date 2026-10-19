@@ -6,10 +6,6 @@
     "repositories": [
         {
             "type": "vcs",
-            "url": "https://github.com/bearsunday/BEAR.Csrf"
-        },
-        {
-            "type": "vcs",
             "url": "https://github.com/bearsunday/BEAR.Resource"
         }
     ],
@@ -17,7 +13,7 @@
         "php": "^8.5.0",
         "auth0/auth0-php": "^8.19",
         "bear/async": "^0.3",
-        "bear/csrf": "^0.2",
+        "bear/csrf": "^0.1",
         "bear/package": "^1.14",
         "bear/qiq-module": "^2.0",
         "bear/query-repository": "^1.16",
