@@ -38,6 +38,15 @@ final class SessionCookieTest extends TestCase
 
     #[RunInSeparateProcess]
     #[PreserveGlobalState(false)]
+    public function testZeroHttpsValueMeansPlainHttp(): void
+    {
+        (new SessionCookie())->configure(['HTTPS' => '0']);
+
+        $this->assertFalse(session_get_cookie_params()['secure']);
+    }
+
+    #[RunInSeparateProcess]
+    #[PreserveGlobalState(false)]
     public function testSecureFollowsPublicOriginBehindTlsTerminatingProxy(): void
     {
         (new SessionCookie())->configure([], 'HTTPS://cms.example.com');

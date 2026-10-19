@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace BEAR\Kata\Auth;
 
 use BEAR\Csrf\CsrfTokenInterface;
+use BEAR\Kata\Exception\SessionRotationException;
 
 use function bin2hex;
 use function hash_equals;
@@ -100,7 +101,10 @@ final class NativeAuthSession implements AuthSessionInterface
      */
     private function rotate(): void
     {
-        session_regenerate_id(true);
+        if (! session_regenerate_id(true)) {
+            throw new SessionRotationException();
+        }
+
         $this->csrf->clear();
     }
 

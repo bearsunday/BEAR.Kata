@@ -44,6 +44,6 @@ final class SessionCookie
             return true;
         }
 
-        return ! in_array($server['HTTPS'] ?? 'off', ['off', ''], true);
+        return ! in_array($server['HTTPS'] ?? 'off', ['off', '', '0'], true);
     }
 }
