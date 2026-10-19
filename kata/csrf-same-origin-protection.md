@@ -79,11 +79,16 @@ form と interceptor が一緒に動くようにするため。
 
 ```php
 // Bootstrap — どの session_start() よりも前
-(new SessionCookie())->configure($server);
+(new SessionCookie())->configure($server, (string) getenv('CMS_ALLOWED_ORIGIN') ?: null);
 ```
 
 `SameSite` は `Lax` であって `Strict` ではない。OAuth callback は cross-site の top-level
 navigation で、login state を持つ cookie をそこで受け取る必要がある。
+
+`Secure` は `CMS_ALLOWED_ORIGIN` の scheme が `https` なら付く。proxy が TLS を終端する構成では
+PHP の見る request は plain HTTP で `$_SERVER['HTTPS']` が立たないため、request の scheme だけを
+見ると production の cookie から `Secure` が静かに落ちる。same-origin 門に渡す public origin は
+その事実を既に持っているので、cookie も同じ値から決める。
 
 ### 認証状態が変わったら session id と token を回す
 
@@ -170,7 +175,7 @@ application が所有する部分のみ。library は [`bear/csrf`](https://gith
 - [`tests/Interceptor/SameOriginWiringTest.php`](../tests/Interceptor/SameOriginWiringTest.php)
 - [`tests/Interceptor/PageCsrfAttributeCoverageTest.php`](../tests/Interceptor/PageCsrfAttributeCoverageTest.php) — 付け忘れ検出
 - [`tests/Interceptor/ProdCsrfBootTest.php`](../tests/Interceptor/ProdCsrfBootTest.php) — origin 未設定で prod が boot に失敗する
-- [`tests/Service/NativeAuthSessionTest.php`](../tests/Service/NativeAuthSessionTest.php) — login / logout で session id が変わり token が破棄される
+- [`tests/Service/NativeAuthSessionTest.php`](../tests/Service/NativeAuthSessionTest.php) — login / logout で session id が変わり `clear()` が呼ばれる
 - [`tests/Service/SessionCookieTest.php`](../tests/Service/SessionCookieTest.php) — cookie 属性が session 開始前に決まる
 
 interceptor 単体の挙動 (signal 優先順位、malformed origin、token 比較) は library 側の
@@ -198,7 +203,7 @@ reflection で検出する — library には見えない穴で、ここが appl
 ## マスター確認（After）
 
 - [ ] 全 Page write method に attribute が付いていることを coverage test で green。属性を1つ外すと落ちることを確認した。
-- [ ] login / logout で session id が変わり `clear()` が呼ばれることを `NativeAuthSessionTest` で green。cookie は `HttpOnly` / `SameSite=Lax` / HTTPS 時 `Secure`。
+- [ ] login / logout で session id が変わり `clear()` が呼ばれることを `NativeAuthSessionTest` で green。cookie は `HttpOnly` / `SameSite=Lax`、public origin が https なら `Secure`。
 - [ ] wiring test が injector 経由で interception の成立を示している。
 - [ ] prod context で `CMS_ALLOWED_ORIGIN` 未設定なら boot に失敗する。
 - [ ] renderer が全 template に token と field 名を供給し、logout で `clear()` される。

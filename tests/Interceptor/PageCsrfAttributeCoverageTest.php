@@ -81,6 +81,21 @@ final class PageCsrfAttributeCoverageTest extends TestCase
         );
     }
 
+    /**
+     * Discovery that finds nothing would make the data-provider test pass
+     * with zero cases; pin the directory and the class derivation here.
+     */
+    public function testDiscoveryFindsTheAdminWriteMethods(): void
+    {
+        $found = [];
+        foreach (self::unsafePageMethodProvider() as [$class, $method]) {
+            $found[] = sprintf('%s::%s', $class, $method);
+        }
+
+        $this->assertContains('BEAR\\Kata\\Resource\\Page\\Admin\\Article::onPost', $found);
+        $this->assertContains('BEAR\\Kata\\Resource\\Page\\Admin\\Logout::onPost', $found);
+    }
+
     /** @return iterable<string, array{class-string, string}> */
     public static function unsafePageMethodProvider(): iterable
     {
@@ -100,7 +115,9 @@ final class PageCsrfAttributeCoverageTest extends TestCase
     private static function pageClasses(): array
     {
         $classes = [];
-        $files = new RecursiveIteratorIterator(new RecursiveDirectoryIterator(self::PAGE_DIR));
+        $files = new RecursiveIteratorIterator(
+            new RecursiveDirectoryIterator(self::PAGE_DIR, RecursiveDirectoryIterator::SKIP_DOTS),
+        );
         foreach ($files as $file) {
             assert($file instanceof SplFileInfo);
             if ($file->getExtension() !== 'php') {

@@ -29,9 +29,27 @@ final class SessionCookieTest extends TestCase
 
     #[RunInSeparateProcess]
     #[PreserveGlobalState(false)]
-    public function testSecureFollowsRequestScheme(): void
+    public function testEmptyHttpsValueMeansPlainHttp(): void
     {
-        (new SessionCookie())->configure([]);
+        (new SessionCookie())->configure(['HTTPS' => '']);
+
+        $this->assertFalse(session_get_cookie_params()['secure']);
+    }
+
+    #[RunInSeparateProcess]
+    #[PreserveGlobalState(false)]
+    public function testSecureFollowsPublicOriginBehindTlsTerminatingProxy(): void
+    {
+        (new SessionCookie())->configure([], 'HTTPS://cms.example.com');
+
+        $this->assertTrue(session_get_cookie_params()['secure']);
+    }
+
+    #[RunInSeparateProcess]
+    #[PreserveGlobalState(false)]
+    public function testPlainPublicOriginDoesNotForceSecure(): void
+    {
+        (new SessionCookie())->configure([], 'http://localhost:8081');
 
         $this->assertFalse(session_get_cookie_params()['secure']);
     }
