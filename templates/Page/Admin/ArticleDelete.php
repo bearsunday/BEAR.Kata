@@ -1,8 +1,6 @@
 <?php
 /**
  * @var \BEAR\Kata\Entity\Article $article
- * @var string $csrfToken
- * @var string $csrfTokenField
  */
 ?>
 {{ setLayout('layout/Default') }}
@@ -19,7 +17,7 @@
 
   <form class="DeleteForm" method="post" action="/admin/articledelete">
     <input type="hidden" name="id" value="{{a $article->id }}">
-    <input type="hidden" name="{{h $csrfTokenField }}" value="{{h $csrfToken }}">
+    {{= csrfField() }}
     <p>This action deletes the article.</p>
     <button type="submit" class="doDeleteArticle">Delete article</button>
   </form>

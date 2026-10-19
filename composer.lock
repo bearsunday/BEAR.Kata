@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "092fce7dbd1373d311a7ab1caeee90f3",
+    "content-hash": "bb8bb324f00d5e77ee4deb7bab4d2850",
     "packages": [
         {
             "name": "aura/cli",
@@ -413,16 +413,16 @@
         },
         {
             "name": "bear/csrf",
-            "version": "0.1.0",
+            "version": "0.2.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/bearsunday/BEAR.Csrf.git",
-                "reference": "08117046997b6e7ad58ee11ef27ceca1fd51d812"
+                "reference": "6e541675b69ffdf4d01bfab7330d57ede853e1d4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/bearsunday/BEAR.Csrf/zipball/08117046997b6e7ad58ee11ef27ceca1fd51d812",
-                "reference": "08117046997b6e7ad58ee11ef27ceca1fd51d812",
+                "url": "https://api.github.com/repos/bearsunday/BEAR.Csrf/zipball/6e541675b69ffdf4d01bfab7330d57ede853e1d4",
+                "reference": "6e541675b69ffdf4d01bfab7330d57ede853e1d4",
                 "shasum": ""
             },
             "require": {
@@ -535,10 +535,10 @@
             ],
             "description": "CSRF protection for BEAR.Sunday",
             "support": {
-                "source": "https://github.com/bearsunday/BEAR.Csrf/tree/0.1.0",
+                "source": "https://github.com/bearsunday/BEAR.Csrf/tree/0.2.0",
                 "issues": "https://github.com/bearsunday/BEAR.Csrf/issues"
             },
-            "time": "2026-09-21T14:06:29+00:00"
+            "time": "2026-10-19T13:03:18+00:00"
         },
         {
             "name": "bear/package",

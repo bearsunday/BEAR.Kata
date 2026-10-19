@@ -128,7 +128,7 @@ private function owns(Article $article, AdminUserInterface $admin): bool
 <?php endif ?>
 
 <form class="ArticleForm" method="post" action="{{h $formAction }}">
-  <input type="hidden" name="{{h $csrfTokenField }}" value="{{h $csrfToken }}">
+  {{= csrfField() }}
   <?php if ($isEdit): ?>
     <input type="hidden" name="id" value="{{h $article->id }}">
   <?php endif ?>

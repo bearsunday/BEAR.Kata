@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace BEAR\Kata\Renderer;
 
-use BEAR\Csrf\CsrfTokenInterface;
-use BEAR\Csrf\Http\CsrfTokenField;
 use BEAR\Kata\Auth\AuthSessionInterface;
 use BEAR\Kata\Auth\UserInterface;
 use BEAR\Kata\Renderer\Exception\InvalidResourcePathException;
@@ -39,8 +37,6 @@ final readonly class CmsQiqRenderer implements RenderInterface
     public function __construct(
         private Template $template,
         private AuthSessionInterface $session,
-        private CsrfTokenInterface $csrf,
-        private CsrfTokenField $csrfTokenField,
     ) {
     }
 
@@ -140,7 +136,7 @@ final readonly class CmsQiqRenderer implements RenderInterface
         return $ro->view;
     }
 
-    /** @return array{cssLevel: int, cssLinks: array<int, string>, user: UserInterface, csrfToken: string, csrfTokenField: string} */
+    /** @return array{cssLevel: int, cssLinks: array<int, string>, user: UserInterface} */
     private function commonVars(ResourceObject $ro): array
     {
         $query = $ro->uri->query;
@@ -160,16 +156,10 @@ final readonly class CmsQiqRenderer implements RenderInterface
             $links[$n] = $path . '?' . http_build_query($merged);
         }
 
-        // `csrfToken` is exposed to every template so layout-level forms
-        // (e.g. the sign-out form in the layout's nav) can embed the
-        // hidden field without each Page resource having to inject it
-        // into $this->body.
         return [
             'cssLevel' => $level,
             'cssLinks' => $links,
             'user' => $this->session->currentUser(),
-            'csrfToken' => $this->csrf->issue(),
-            'csrfTokenField' => $this->csrfTokenField->name,
         ];
     }
 }

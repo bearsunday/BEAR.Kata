@@ -17,6 +17,7 @@
         "php": "^8.5.0",
         "auth0/auth0-php": "^8.19",
         "bear/async": "^0.3",
+        "bear/csrf": "^0.2",
         "bear/package": "^1.14",
         "bear/qiq-module": "^2.0",
         "bear/query-repository": "^1.16",
@@ -29,7 +30,6 @@
         "qiq/qiq": "^3.0",
         "ray/aop": "^2.12",
         "ray/aura-sql-module": "^1.17",
-        "bear/csrf": "^0.1",
         "ray/di": "^2.14",
         "ray/input-query": "^1.0",
         "ray/media-query": "^1.1"

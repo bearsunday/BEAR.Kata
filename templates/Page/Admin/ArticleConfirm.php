@@ -6,8 +6,6 @@
  * @var list<string> $tagNames
  * @var bool $alreadyPublished
  * @var list<string> $errors
- * @var string $csrfToken
- * @var string $csrfTokenField
  */
 ?>
 {{ setLayout('layout/Default') }}
@@ -52,7 +50,7 @@
   <?php else: ?>
     <form class="PublishForm" method="post" action="/admin/articleconfirm">
       <input type="hidden" name="id" value="{{a $article->id }}">
-      <input type="hidden" name="{{h $csrfTokenField }}" value="{{h $csrfToken }}">
+      {{= csrfField() }}
       <p>Publishing will make this article visible on the public site.</p>
       <button type="submit" class="doPublishArticle">Publish article</button>
       <a href="/admin/article?id={{h $article->id }}" class="doUpdateArticle">Back to edit</a>

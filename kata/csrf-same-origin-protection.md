@@ -56,20 +56,25 @@ method 引数に token を取らないことに注意。CSRF は transport の�
 
 ### token を view にどう渡すか
 
-Resource は hidden field の存在を知らない。renderer が `CsrfTokenInterface` から発行して
-template 変数に載せる:
+Resource も renderer も hidden field の存在を知らない。template helper が `bear/csrf` の
+`CsrfHiddenInput` に委譲し、form の中で呼ぶ:
 
 ```php
-// CmsQiqRenderer — 全 template に渡る共通変数
-return [
-    'user' => $this->session->currentUser(),
-    'csrfToken' => $this->csrf->issue(),
-    'csrfTokenField' => $this->csrfTokenField->name,
-];
+// CmsHelpers — QiqModule の HtmlHelpers を置き換える Helpers
+public function csrfField(): string
+{
+    return ($this->csrfHiddenInput)();
+}
 ```
 
-field 名を template に直書きせず `CsrfTokenField` から渡すのは、wire 名を変えたときに
-form と interceptor が一緒に動くようにするため。
+```html
+<form class="ArticleForm" method="post" action="{{h $formAction }}">
+  {{= csrfField() }}
+```
+
+`CsrfHiddenInput` は name と value を escape 済みの 1 文字列を返すので、`{{= }}` で raw 出力する。
+field 名を template に直書きしないのは、wire 名を変えたときに form と interceptor が一緒に
+動くようにするため。token は form が描画されたときだけ発行される。
 
 ### session cookie は application が決める
 
@@ -157,7 +162,7 @@ attribute → interceptor → module の対応が名前で追える:
 | Marker attribute | `<Concern>`（`TARGET_METHOD`） | `CsrfToken`, `SameOrigin` |
 | Interceptor | `<Attribute名>Interceptor` | `CsrfTokenInterceptor`, `SameOriginInterceptor` |
 | 束ねるModule | `<Concern>Module` | `CsrfModule` |
-| hidden field名 | `_csrf_token`（`CsrfModule` 第2引数の既定値） | template変数 `$csrfTokenField` |
+| hidden field名 | `_csrf_token`（`CsrfModule` 第2引数の既定値） | helper `csrfField()` が `CsrfHiddenInput` から描画 |
 
 > 命名規則の全容は [conventions.md](../docs/conventions.md#3-naming) を参照。
 
@@ -179,7 +184,7 @@ application が所有する部分のみ。library は [`bear/csrf`](https://gith
 - [`src/Bootstrap.php`](../src/Bootstrap.php) / [`src/Auth/SessionCookie.php`](../src/Auth/SessionCookie.php) — 最初の `session_start()` より前の cookie 属性
 - [`src/Auth/RequestScheme.php`](../src/Auth/RequestScheme.php) — `Secure` の判定。session cookie と Auth0 SDK の cookie が共有する
 - [`src/Exception/MissingAllowedOriginException.php`](../src/Exception/MissingAllowedOriginException.php)
-- [`src/Renderer/CmsQiqRenderer.php`](../src/Renderer/CmsQiqRenderer.php) — token と field 名の view 供給
+- [`src/Renderer/CmsHelpers.php`](../src/Renderer/CmsHelpers.php) / [`src/Module/HtmlModule.php`](../src/Module/HtmlModule.php) — `csrfField()` helper と、QiqModule の `Helpers` をそれに置き換える binding
 - [`src/Resource/Page/Admin/Article.php`](../src/Resource/Page/Admin/Article.php) — attribute の置き場
 - [`src/Auth/NativeAuthSession.php`](../src/Auth/NativeAuthSession.php) — login/logout での session id 再生成と token 破棄
 - [`src/Exception/SessionRotationException.php`](../src/Exception/SessionRotationException.php) / [`src/Exception/SessionAlreadyActiveException.php`](../src/Exception/SessionAlreadyActiveException.php) — 回転と cookie 設定の fail-closed
@@ -193,6 +198,7 @@ application が所有する部分のみ。library は [`bear/csrf`](https://gith
 - [`tests/Service/NativeAuthSessionTest.php`](../tests/Service/NativeAuthSessionTest.php) — login / logout で session id が変わり `clear()` が呼ばれる。回せなければ login が中断する
 - [`tests/Service/SessionCookieTest.php`](../tests/Service/SessionCookieTest.php) — cookie 属性が session 開始前に決まる。開始後なら拒否する
 - [`tests/Service/RequestSchemeTest.php`](../tests/Service/RequestSchemeTest.php) — public origin と `$_SERVER['HTTPS']` からの `Secure` 判定
+- [`tests/Renderer/CmsHelpersTest.php`](../tests/Renderer/CmsHelpersTest.php) — helper が bound field 名で描画する。POST form はすべて helper 経由で、手書きの input がない
 - [`tests/Provider/Auth0ProviderTest.php`](../tests/Provider/Auth0ProviderTest.php) — Auth0 SDK の cookie にも同じ判定が渡る
 
 interceptor 単体の挙動 (signal 優先順位、malformed origin、token 比較) は library 側の
@@ -202,7 +208,7 @@ test が持つ。ここで再実装すると、同じ契約の記述が二つに
 
 門の位置と網羅が application の責任、仕組みは library の責任。`#[CsrfToken]` / `#[SameOrigin]`
 は browser が触る Page/Admin の unsafe verb にのみ付け、method 引数には token を取らない。
-hidden field は renderer が `$csrfToken` / `$csrfTokenField` として全 template に供給し、
+hidden field は template helper `csrfField()` が `CsrfHiddenInput` から描画し、
 login / logout では `session_regenerate_id(true)` と `CsrfTokenInterface::clear()`。cookie 属性は
 `Bootstrap` が最初の `session_start()` より前に決める。`PageCsrfAttributeCoverageTest` が付け忘れを
 reflection で検出する — library には見えない穴で、ここが application 側で最も効く一手。
