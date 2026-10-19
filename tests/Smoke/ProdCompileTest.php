@@ -13,11 +13,14 @@ use PHPUnit\Framework\Attributes\RunInSeparateProcess;
 use PHPUnit\Framework\TestCase;
 use Ray\Compiler\Compiler;
 
+use function array_map;
 use function dirname;
 use function glob;
 use function putenv;
+use function rmdir;
 use function sys_get_temp_dir;
 use function uniqid;
+use function unlink;
 
 /**
  * Ray.Compiler resolves explicit bindings only. A constructor argument that the
@@ -37,9 +40,14 @@ final class ProdCompileTest extends TestCase
         $module->install(new ResourceObjectModule($meta->getResourceListGenerator()));
         $scriptDir = sys_get_temp_dir() . '/' . uniqid('kata-' . $context . '-', true);
 
-        (new Compiler())->compile($module, $scriptDir);
+        try {
+            (new Compiler())->compile($module, $scriptDir);
 
-        $this->assertNotEmpty(glob($scriptDir . '/*.php'));
+            $this->assertNotEmpty(glob($scriptDir . '/*.php'));
+        } finally {
+            array_map(unlink(...), glob($scriptDir . '/*') ?: []);
+            rmdir($scriptDir);
+        }
     }
 
     /** @return iterable<string, array{string}> */
