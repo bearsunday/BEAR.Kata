@@ -166,7 +166,7 @@ login / callback / logout は別Page Resourceに分け、URLと1対1にする（
 
 ## 着手前チェック（Before）
 
-- [ ] login（state発行→302）/ callback（state検証→token交換→session確立）/ logout（session破棄）を別Page Resourceに分けると決めたか。
+- [ ] login（state発行→302）/ callback（state検証→token交換→session確立）/ logout（user を外して session id を回す）を別Page Resourceに分けると決めたか。
 - [ ] CSRF/replay対策として `issueState()` → `consumeState()`（one-time消費 + `hash_equals` 比較）のstate検証を入れると決めたか。
 - [ ] 外部identityを `(provider, subject) → authorId` でマッピングし、emailは初回ログインのfallbackのみと理解したか。
 - [ ] logoutはGETでなくPOST（`#[SameOrigin]` + `#[CsrfToken]`）にすると決めたか。

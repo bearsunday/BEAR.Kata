@@ -4,12 +4,17 @@ declare(strict_types=1);
 
 namespace BEAR\Kata\Auth;
 
+use BEAR\Kata\Exception\SessionAlreadyActiveException;
+
 use function in_array;
 use function ini_set;
+use function is_string;
 use function parse_url;
 use function session_set_cookie_params;
+use function session_status;
 use function strtolower;
 
+use const PHP_SESSION_ACTIVE;
 use const PHP_URL_SCHEME;
 
 /**
@@ -29,6 +34,10 @@ final class SessionCookie
     /** @param array<string, mixed> $server */
     public function configure(array $server, string|null $publicOrigin = null): void
     {
+        if (session_status() === PHP_SESSION_ACTIVE) {
+            throw new SessionAlreadyActiveException();
+        }
+
         ini_set('session.use_strict_mode', '1');
         session_set_cookie_params([
             'httponly' => true,
@@ -44,6 +53,8 @@ final class SessionCookie
             return true;
         }
 
-        return ! in_array($server['HTTPS'] ?? 'off', ['off', '', '0'], true);
+        $https = $server['HTTPS'] ?? '';
+
+        return is_string($https) && ! in_array(strtolower($https), ['', 'off', '0'], true);
     }
 }

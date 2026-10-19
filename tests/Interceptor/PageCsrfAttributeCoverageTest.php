@@ -6,6 +6,7 @@ namespace BEAR\Kata\Interceptor;
 
 use BEAR\Csrf\Attribute\CsrfToken;
 use BEAR\Csrf\Attribute\SameOrigin;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
@@ -53,7 +54,7 @@ final class PageCsrfAttributeCoverageTest extends TestCase
     private const string PAGE_NAMESPACE = 'BEAR\\Kata\\Resource\\Page\\';
     private const array UNSAFE_VERBS = ['onPost', 'onPut', 'onDelete', 'onPatch'];
 
-    /** @dataProvider unsafePageMethodProvider */
+    #[DataProvider('unsafePageMethodProvider')]
     public function testUnsafePageMethodHasSameOriginAndCsrfToken(string $class, string $method): void
     {
         $names = $this->attributeNames(new ReflectionMethod($class, $method));

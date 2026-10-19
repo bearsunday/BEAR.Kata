@@ -5,12 +5,14 @@ declare(strict_types=1);
 namespace BEAR\Kata\Service;
 
 use BEAR\Kata\Auth\SessionCookie;
+use BEAR\Kata\Exception\SessionAlreadyActiveException;
 use PHPUnit\Framework\Attributes\PreserveGlobalState;
 use PHPUnit\Framework\Attributes\RunInSeparateProcess;
 use PHPUnit\Framework\TestCase;
 
 use function ini_get;
 use function session_get_cookie_params;
+use function session_start;
 
 final class SessionCookieTest extends TestCase
 {
@@ -47,6 +49,15 @@ final class SessionCookieTest extends TestCase
 
     #[RunInSeparateProcess]
     #[PreserveGlobalState(false)]
+    public function testOffHttpsValueIsCaseInsensitive(): void
+    {
+        (new SessionCookie())->configure(['HTTPS' => 'OFF']);
+
+        $this->assertFalse(session_get_cookie_params()['secure']);
+    }
+
+    #[RunInSeparateProcess]
+    #[PreserveGlobalState(false)]
     public function testSecureFollowsPublicOriginBehindTlsTerminatingProxy(): void
     {
         (new SessionCookie())->configure([], 'HTTPS://cms.example.com');
@@ -61,5 +72,17 @@ final class SessionCookieTest extends TestCase
         (new SessionCookie())->configure([], 'http://localhost:8081');
 
         $this->assertFalse(session_get_cookie_params()['secure']);
+    }
+
+    /** PHP silently ignores cookie params once a session runs; that must not pass as hardened. */
+    #[RunInSeparateProcess]
+    #[PreserveGlobalState(false)]
+    public function testRefusesToConfigureAnActiveSession(): void
+    {
+        session_start();
+
+        $this->expectException(SessionAlreadyActiveException::class);
+
+        (new SessionCookie())->configure(['HTTPS' => 'on']);
     }
 }
