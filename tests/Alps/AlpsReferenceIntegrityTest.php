@@ -9,16 +9,24 @@ use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use SplFileInfo;
 
-use function array_diff;
+use function array_flip;
 use function array_unique;
 use function array_values;
 use function count;
+use function dirname;
 use function file_get_contents;
+use function implode;
+use function in_array;
 use function is_array;
 use function is_string;
 use function json_decode;
+use function ksort;
 use function preg_match_all;
+use function realpath;
 use function sort;
+use function str_starts_with;
+use function strlen;
+use function substr;
 
 use const JSON_THROW_ON_ERROR;
 use const PREG_SET_ORDER;
@@ -35,14 +43,19 @@ use const PREG_SET_ORDER;
  * `#[Embed]` dependency propagation, `UriTagInterface::fromAssoc`) and is
  * out of scope for `profile.json`, whose own `doc` states it "Covers
  * articles, categories, tags, authors and media" — not the cache showcase.
- * `Cache\ArticleTags` spells this out directly: "the showcase deliberately
- * keeps the cache surface self-contained". {@see self::CACHE_SHOWCASE_GAP}
- * is that boundary, enumerated rather than pattern-matched so a *new*
- * reference outside the cache namespace still fails loudly here instead of
- * being silently swallowed by a `Cache*` prefix check.
+ * {@see self::CACHE_SHOWCASE_GAP} is that boundary, enumerated rather than
+ * pattern-matched so a *new* reference outside the cache namespace still
+ * fails loudly here instead of being silently swallowed by a `Cache*` prefix
+ * check. An entry explains a reference only when every file declaring that id
+ * sits under {@see self::CACHE_SHOWCASE_DIR}; the same id used by a mainline
+ * resource is still reported.
  */
 final class AlpsReferenceIntegrityTest extends TestCase
 {
+    private const string CACHE_SHOWCASE_DIR = 'src/Resource/App/Cache/';
+
+    private const string ALPS_REFERENCE = '/#\[Alps\(\s*(?:id\s*:\s*)?(["\'])([^"\']+)\1\s*\)\]/';
+
     /**
      * Every `#[Alps]` id declared under `src/Resource/App/Cache/`. Each is a
      * read/write pair for one of the five cache-pattern showcases:
@@ -70,29 +83,54 @@ final class AlpsReferenceIntegrityTest extends TestCase
 
     public function testEveryAlpsReferenceExistsInTheProfile(): void
     {
-        $missing = array_diff($this->referencedIds(), $this->profileIds());
+        $profileIds = array_flip($this->profileIds());
+        $unexplained = [];
+        foreach ($this->referencedIdsByFile() as $id => $files) {
+            if (isset($profileIds[$id])) {
+                continue;
+            }
 
-        $this->assertSame([], array_values(array_diff($missing, self::CACHE_SHOWCASE_GAP)));
+            if (in_array($id, self::CACHE_SHOWCASE_GAP, true) && $this->allInCacheShowcase($files)) {
+                continue;
+            }
+
+            $unexplained[$id] = $files;
+        }
+
+        $this->assertSame(
+            [],
+            $unexplained,
+            'Every #[Alps] id must exist in var/alps/profile.json. An allowlisted id is explained only when '
+            . 'it is declared solely under ' . self::CACHE_SHOWCASE_DIR . '.',
+        );
     }
 
     /**
      * The inverse of the assertion above: an id that leaves the cache
-     * showcase (by being added to the profile, or by the resource being
-     * deleted) must leave this list too, or the allowlist would silently
-     * mask a future unrelated drift.
+     * showcase — by being added to the profile, by the resource being deleted,
+     * or by appearing under a mainline resource — must leave this list too, or
+     * the allowlist would silently mask a future unrelated drift.
      */
     public function testCacheShowcaseGapHasNoStaleEntry(): void
     {
-        $missing = array_diff($this->referencedIds(), $this->profileIds());
+        $profileIds = array_flip($this->profileIds());
+        $referenced = $this->referencedIdsByFile();
 
-        $this->assertSame([], array_values(array_diff(self::CACHE_SHOWCASE_GAP, $missing)));
+        foreach (self::CACHE_SHOWCASE_GAP as $id) {
+            $this->assertArrayHasKey($id, $referenced, $id . ' is no longer referenced; drop it from CACHE_SHOWCASE_GAP.');
+            $this->assertArrayNotHasKey($id, $profileIds, $id . ' now resolves in the profile; drop it from CACHE_SHOWCASE_GAP.');
+            $this->assertTrue(
+                $this->allInCacheShowcase($referenced[$id]),
+                $id . ' is also declared outside ' . self::CACHE_SHOWCASE_DIR . ': ' . implode(', ', $referenced[$id]),
+            );
+        }
     }
 
     /** A profile or src/ tree that stopped parsing would make the assertions above vacuous. */
     public function testProfileAndReferencesArePopulated(): void
     {
         $this->assertGreaterThan(40, count($this->profileIds()));
-        $this->assertGreaterThan(40, count($this->referencedIds()));
+        $this->assertGreaterThan(40, count($this->referencedIdsByFile()));
     }
 
     /** @return list<string> */
@@ -129,10 +167,11 @@ final class AlpsReferenceIntegrityTest extends TestCase
         return $this->normalize($ids);
     }
 
-    /** @return list<string> */
-    private function referencedIds(): array
+    /** @return array<string, list<string>> id => declaring files, relative to the repository root */
+    private function referencedIdsByFile(): array
     {
-        $ids = [];
+        $root = (string) realpath(dirname(__DIR__, 2));
+        $byId = [];
         $iterator = new RecursiveIteratorIterator(
             new RecursiveDirectoryIterator(__DIR__ . '/../../src'),
         );
@@ -145,14 +184,32 @@ final class AlpsReferenceIntegrityTest extends TestCase
                 continue;
             }
 
+            $path = substr((string) realpath($file->getPathname()), strlen($root) + 1);
             $contents = (string) file_get_contents($file->getPathname());
-            preg_match_all("/#\[Alps\('([^']+)'\)\]/", $contents, $matches, PREG_SET_ORDER);
-            foreach ($matches as [, $id]) {
-                $ids[] = $id;
+            preg_match_all(self::ALPS_REFERENCE, $contents, $matches, PREG_SET_ORDER);
+            foreach ($matches as [, , $id]) {
+                $byId[$id][] = $path;
             }
         }
 
-        return $this->normalize($ids);
+        ksort($byId);
+        foreach ($byId as $id => $files) {
+            $byId[$id] = $this->normalize($files);
+        }
+
+        return $byId;
+    }
+
+    /** @param list<string> $files */
+    private function allInCacheShowcase(array $files): bool
+    {
+        foreach ($files as $file) {
+            if (! str_starts_with($file, self::CACHE_SHOWCASE_DIR)) {
+                return false;
+            }
+        }
+
+        return $files !== [];
     }
 
     /**

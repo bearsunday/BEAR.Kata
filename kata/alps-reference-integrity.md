@@ -12,26 +12,36 @@
 
 ### 走査 — `src/` から `#[Alps('id')]` を集める
 
-正規表現でsourceを走査し、重複除去・ソートして正規化する:
+sourceを走査し、**idだけでなく宣言しているファイルのパスも**残す。正規表現はシングル/ダブルクォートと `id:` 付きの名前引数を受ける:
 
 ```php
-preg_match_all("/#\[Alps\('([^']+)'\)\]/", $contents, $matches, PREG_SET_ORDER);
-foreach ($matches as [, $id]) {
-    $ids[] = $id;
+preg_match_all(self::ALPS_REFERENCE, $contents, $matches, PREG_SET_ORDER);
+foreach ($matches as [, , $id]) {
+    $byId[$id][] = $path; // リポジトリルートからの相対パス
 }
 ```
 
 ### 差集合 — profileに実在しないidを見つける
 
-`var/alps/profile.json` の `descriptor[].id` と比較し、参照が実在するかを確認する:
+`var/alps/profile.json` の `descriptor[].id` と比較する。allowlistで説明できるのは「そのidの宣言箇所が**すべて** cache showcase配下」のときだけ:
 
 ```php
-$missing = array_diff($this->referencedIds(), $this->profileIds());
+foreach ($this->referencedIdsByFile() as $id => $files) {
+    if (isset($profileIds[$id])) {
+        continue;
+    }
 
-$this->assertSame([], array_values(array_diff($missing, self::CACHE_SHOWCASE_GAP)));
+    if (in_array($id, self::CACHE_SHOWCASE_GAP, true) && $this->allInCacheShowcase($files)) {
+        continue;
+    }
+
+    $unexplained[$id] = $files;
+}
+
+$this->assertSame([], $unexplained, '...');
 ```
 
-### allowlist — 理由を言えるものだけ
+### allowlist — idだけでは判定しない
 
 allowlistは「黙らせる」ためではなく「意図的にprofile外」と言えるものだけを列挙する。`Cache\*` 名前空間はcache属性の見せ方に特化したshowcaseで、`profile.json` 自身の `doc` が "Covers articles, categories, tags, authors and media" と明言する本流のCMS意味論に含まれない:
 
@@ -39,28 +49,34 @@ allowlistは「黙らせる」ためではなく「意図的にprofile外」と�
 private const CACHE_SHOWCASE_GAP = [
     'ArticleTags',
     'AuthorProfile',
-    'CacheArticlePreview',
-    'doUpdateCacheArticleTags',
-    'doUpdateCacheAuthor',
-    'doUpdateCacheTag',
-    'goAuthorProfile',
-    'goCacheArticlePreview',
-    'goCacheArticleTags',
-    'goCacheAuthor',
-    'goCacheTag',
+    // ...
 ];
+```
+
+**idだけを条件にすると穴になる。** 本流のResourceが `#[Alps('ArticleTags')]` と書いた場合、idはallowlistにあるので見逃され、逆テストもcache側の宣言が残っている限りgreenになる。宣言箇所まで条件に入れる:
+
+```php
+private function allInCacheShowcase(array $files): bool
+{
+    foreach ($files as $file) {
+        if (! str_starts_with($file, self::CACHE_SHOWCASE_DIR)) {
+            return false;
+        }
+    }
+
+    return $files !== [];
+}
 ```
 
 ### 逆テスト — allowlistの陳腐化を検出する
 
-allowlistに残っているのに実際はもうprofileに存在する（＝直った）idがあれば落ちる。直したのにallowlistの行を消し忘れる事故を防ぐ:
+allowlistの各行について、(1) 参照がまだ存在する、(2) profileにまだ無い、(3) 宣言箇所がすべてcache showcase配下、を確かめる。直したのに行を消し忘れる事故と、本流への参照の混入を同時に防ぐ:
 
 ```php
-public function testCacheShowcaseGapHasNoStaleEntry(): void
-{
-    $missing = array_diff($this->referencedIds(), $this->profileIds());
-
-    $this->assertSame([], array_values(array_diff(self::CACHE_SHOWCASE_GAP, $missing)));
+foreach (self::CACHE_SHOWCASE_GAP as $id) {
+    $this->assertArrayHasKey($id, $referenced);
+    $this->assertArrayNotHasKey($id, $profileIds);
+    $this->assertTrue($this->allInCacheShowcase($referenced[$id]));
 }
 ```
 
@@ -72,7 +88,7 @@ profileのJSONパースが壊れた、または `src/` の走査先が空にな�
 public function testProfileAndReferencesArePopulated(): void
 {
     $this->assertGreaterThan(40, count($this->profileIds()));
-    $this->assertGreaterThan(40, count($this->referencedIds()));
+    $this->assertGreaterThan(40, count($this->referencedIdsByFile()));
 }
 ```
 
@@ -107,11 +123,12 @@ allowlistはprefixパターンマッチではなく列挙にする — 新しい
 
 ## Key points
 
-`#[Alps('id')]` はResourceが「このprofile descriptorを実装している」と主張するものだが、`asd --validate` はprofile自体の構文しか見ず、コードからの参照が実在するかは検査しない。この型はsrcを走査して集めたid集合とprofileのdescriptor id集合の差集合を取り、残りをallowlistと突き合わせる。allowlistには逆方向のテストを付け（直ったのに残っていたら落ちる）、profileやsrc走査が壊れて両assertが空虚化しないよう最低件数のlower boundで守る。3段構えのどれか1つを削ると保証が崩れる。
+`#[Alps('id')]` はResourceが「このprofile descriptorを実装している」と主張するものだが、`asd --validate` はprofile自体の構文しか見ず、コードからの参照が実在するかは検査しない。この型はsrcを走査して集めたid集合とprofileのdescriptor id集合の差集合を取り、残りをallowlistと突き合わせる。allowlistには逆方向のテストを付け（直ったのに残っていたら落ちる）、idだけでなく宣言箇所も条件に入れ（本流のResourceが同じidを名乗ったら落ちる）、profileやsrc走査が壊れて両assertが空虚化しないよう最低件数のlower boundで守る。3段構えのどれか1つを削ると保証が崩れる。
 
 ## Do not
 
 - allowlistを「いま落ちているものを黙らせるため」に使わない — 1件ごとに理由（なぜprofile外で正しいか）が言えるものだけを入れる。理由が言えない参照は `#[Alps]` 側を直すか、profileにdescriptorを足す。
+- allowlistをidの集合としてだけ扱わない — 同じidがcache showcaseの外で使われたら素通りする。宣言箇所が `src/Resource/App/Cache/` 配下であることまで条件にする。
 - profileを触らずテストを緩める方向に倒さない — 参照がprofileに実在しないなら、まず「属性側の綴りが間違っているか」「profile側に真の欠落があるか」を疑い、allowlistは最後の選択肢にする。
 
 ## マスター確認（After）
