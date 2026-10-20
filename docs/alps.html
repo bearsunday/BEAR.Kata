@@ -89,7 +89,7 @@ td a:hover{text-decoration:underline;}
 </style>
 <script>
 // ALPS relationship data for parent-child highlighting
-window.alpsRelationships = {"parentOf":{"id":["Article","ArticleList","Category","CategoryList","Tag","TagList","Author","Media","goArticle","goCategory","goTag","goAuthor","goMedia","doUpdateArticle","doDeleteArticle","doPublishArticle","doUpdateCategory","doDeleteCategory","doDeleteTag","doUpdateAuthor","doDeleteMedia"],"slug":["Article","ArticleList","Category","CategoryList","Tag","TagList","doCreateArticle","doCreateCategory","doCreateTag"],"title":["Article","ArticleList","doCreateArticle","doUpdateArticle"],"body":["Article","doCreateArticle","doUpdateArticle"],"excerpt":["Article","ArticleList","doCreateArticle","doUpdateArticle"],"status":["Article","ArticleList","goArticleList","doCreateArticle","doUpdateArticle"],"publishedAt":["Article","ArticleList","doPublishArticle"],"authorId":["Article","doCreateArticle"],"categoryId":["Article","goArticleList","doCreateArticle"],"Author":["Article"],"Category":["Article"],"Tag":["Article"],"goArticleList":["Article","Category","Tag","Author"],"goAuthor":["Article"],"goCategory":["Article","CategoryList"],"doUpdateArticle":["Article"],"doDeleteArticle":["Article"],"doPublishArticle":["Article"],"page":["ArticleList","goArticleList"],"perPage":["ArticleList","goArticleList"],"totalCount":["ArticleList"],"goArticle":["ArticleList"],"doCreateArticle":["ArticleList"],"name":["Category","CategoryList","Tag","TagList","Author","doCreateCategory","doUpdateCategory","doCreateTag","doCreateAuthor","doUpdateAuthor"],"description":["Category","doCreateCategory","doUpdateCategory"],"parentId":["Category","CategoryList","doCreateCategory","doUpdateCategory"],"goCategoryList":["Category"],"doUpdateCategory":["Category"],"doDeleteCategory":["Category"],"doCreateCategory":["CategoryList"],"goTagList":["Tag"],"doDeleteTag":["Tag"],"goTag":["TagList"],"doCreateTag":["TagList"],"email":["Author","doCreateAuthor","doUpdateAuthor"],"bio":["Author","doCreateAuthor","doUpdateAuthor"],"doUpdateAuthor":["Author"],"filename":["Media","doCreateMedia"],"mimeType":["Media","doCreateMedia"],"url":["Media","doCreateMedia"],"alt":["Media","doCreateMedia","doUploadMediaFile"],"width":["Media","doCreateMedia"],"height":["Media","doCreateMedia"],"doUploadMediaFile":["Media"],"doDeleteMedia":["Media"],"tagId":["goArticleList"],"file":["doUploadMediaFile"]},"childrenOf":{"Article":["id","slug","title","body","excerpt","status","publishedAt","authorId","categoryId","Author","Category","Tag","goArticleList","goAuthor","goCategory","doUpdateArticle","doDeleteArticle","doPublishArticle"],"ArticleList":["id","slug","title","excerpt","status","publishedAt","page","perPage","totalCount","goArticle","doCreateArticle"],"Category":["id","slug","name","description","parentId","goCategoryList","goArticleList","doUpdateCategory","doDeleteCategory"],"CategoryList":["id","slug","name","parentId","goCategory","doCreateCategory"],"Tag":["id","slug","name","goTagList","goArticleList","doDeleteTag"],"TagList":["id","slug","name","goTag","doCreateTag"],"Author":["id","name","email","bio","goArticleList","doUpdateAuthor"],"Media":["id","filename","mimeType","url","alt","width","height","doUploadMediaFile","doDeleteMedia"],"goArticleList":["page","perPage","categoryId","tagId","status"],"goArticle":["id"],"goCategory":["id"],"goTag":["id"],"goAuthor":["id"],"goMedia":["id"],"doCreateArticle":["slug","title","body","excerpt","status","authorId","categoryId"],"doUpdateArticle":["id","title","body","excerpt","status"],"doDeleteArticle":["id"],"doPublishArticle":["id","publishedAt"],"doCreateCategory":["slug","name","description","parentId"],"doUpdateCategory":["id","name","description","parentId"],"doDeleteCategory":["id"],"doCreateTag":["slug","name"],"doDeleteTag":["id"],"doCreateAuthor":["name","email","bio"],"doUpdateAuthor":["id","name","email","bio"],"doCreateMedia":["filename","mimeType","url","alt","width","height"],"doUploadMediaFile":["file","alt"],"doDeleteMedia":["id"]}};
+window.alpsRelationships = {"parentOf":{"id":["Article","ArticleList","Category","CategoryList","Tag","TagList","Author","AuthorList","Media","goArticle","goCategory","goTag","goAuthor","goMedia","doUpdateArticle","doDeleteArticle","doPublishArticle","doUpdateCategory","doDeleteCategory","doDeleteTag","doUpdateAuthor","doDeleteMedia"],"slug":["Article","ArticleList","Category","CategoryList","Tag","TagList","doCreateArticle","doCreateCategory","doCreateTag"],"title":["Article","ArticleList","doCreateArticle","doUpdateArticle"],"body":["Article","doCreateArticle","doUpdateArticle"],"excerpt":["Article","ArticleList","doCreateArticle","doUpdateArticle"],"status":["Article","ArticleList","goArticleList","doCreateArticle","doUpdateArticle"],"publishedAt":["Article","ArticleList","doPublishArticle"],"authorId":["Article","doCreateArticle"],"categoryId":["Article","goArticleList","doCreateArticle"],"Author":["Article"],"Category":["Article"],"Tag":["Article"],"goArticleList":["Article","Category","Tag","Author"],"goAuthor":["Article","AuthorList"],"goCategory":["Article","CategoryList"],"doUpdateArticle":["Article"],"doDeleteArticle":["Article"],"doPublishArticle":["Article"],"page":["ArticleList","goArticleList"],"perPage":["ArticleList","goArticleList"],"totalCount":["ArticleList"],"goArticle":["ArticleList"],"doCreateArticle":["ArticleList"],"name":["Category","CategoryList","Tag","TagList","Author","AuthorList","doCreateCategory","doUpdateCategory","doCreateTag","doCreateAuthor","doUpdateAuthor"],"description":["Category","doCreateCategory","doUpdateCategory"],"parentId":["Category","CategoryList","doCreateCategory","doUpdateCategory"],"goCategoryList":["Category"],"doUpdateCategory":["Category"],"doDeleteCategory":["Category"],"doCreateCategory":["CategoryList"],"goTagList":["Tag"],"doDeleteTag":["Tag"],"goTag":["TagList"],"doCreateTag":["TagList"],"email":["Author","AuthorList","doCreateAuthor","doUpdateAuthor"],"bio":["Author","AuthorList","doCreateAuthor","doUpdateAuthor"],"doUpdateAuthor":["Author"],"doCreateAuthor":["AuthorList"],"filename":["Media","doCreateMedia"],"mimeType":["Media","doCreateMedia"],"url":["Media","doCreateMedia"],"alt":["Media","doCreateMedia","doUploadMediaFile"],"width":["Media","doCreateMedia"],"height":["Media","doCreateMedia"],"doUploadMediaFile":["Media"],"doDeleteMedia":["Media"],"tagId":["goArticleList"],"file":["doUploadMediaFile"]},"childrenOf":{"Article":["id","slug","title","body","excerpt","status","publishedAt","authorId","categoryId","Author","Category","Tag","goArticleList","goAuthor","goCategory","doUpdateArticle","doDeleteArticle","doPublishArticle"],"ArticleList":["id","slug","title","excerpt","status","publishedAt","page","perPage","totalCount","goArticle","doCreateArticle"],"Category":["id","slug","name","description","parentId","goCategoryList","goArticleList","doUpdateCategory","doDeleteCategory"],"CategoryList":["id","slug","name","parentId","goCategory","doCreateCategory"],"Tag":["id","slug","name","goTagList","goArticleList","doDeleteTag"],"TagList":["id","slug","name","goTag","doCreateTag"],"Author":["id","name","email","bio","goArticleList","doUpdateAuthor"],"AuthorList":["id","name","email","bio","goAuthor","doCreateAuthor"],"Media":["id","filename","mimeType","url","alt","width","height","doUploadMediaFile","doDeleteMedia"],"goArticleList":["page","perPage","categoryId","tagId","status"],"goArticle":["id"],"goCategory":["id"],"goTag":["id"],"goAuthor":["id"],"goMedia":["id"],"doCreateArticle":["slug","title","body","excerpt","status","authorId","categoryId"],"doUpdateArticle":["id","title","body","excerpt","status"],"doDeleteArticle":["id"],"doPublishArticle":["id","publishedAt"],"doCreateCategory":["slug","name","description","parentId"],"doUpdateCategory":["id","name","description","parentId"],"doDeleteCategory":["id"],"doCreateTag":["slug","name"],"doDeleteTag":["id"],"doCreateAuthor":["name","email","bio"],"doUpdateAuthor":["id","name","email","bio"],"doCreateMedia":["filename","mimeType","url","alt","width","height"],"doUploadMediaFile":["file","alt"],"doDeleteMedia":["id"]}};
 
 // Scroll to descriptor row and highlight it
 function scrollToDescriptor(id) {
@@ -206,37 +206,37 @@ document.addEventListener('DOMContentLoaded', function() {
 <!-- Generated by graphviz version 15.0.0 (20260523.1842)
  -->
 <!-- Title: application_state_diagram Pages: 1 -->
-<svg width="1069pt" height="250pt"
- viewBox="0.00 0.00 1069.00 250.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 246.4)">
+<svg width="1003pt" height="354pt"
+ viewBox="0.00 0.00 1003.00 354.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 349.6)">
 <title>application_state_diagram</title>
-<polygon fill="white" stroke="none" points="-4,4 -4,-246.4 1065.25,-246.4 1065.25,4 -4,4"/>
+<polygon fill="white" stroke="none" points="-4,4 -4,-349.6 999.44,-349.6 999.44,4 -4,4"/>
 <!-- Article -->
 <g id="node1" class="node">
 <title>Article</title>
 <g id="a_node1"><a xlink:href="#Article" xlink:title="Article">
-<polygon fill="lightgray" stroke="black" stroke-width="2" points="504.54,-242.4 450.54,-242.4 450.54,-206.4 504.54,-206.4 504.54,-242.4"/>
-<text xml:space="preserve" text-anchor="middle" x="477.54" y="-220.2" font-family="Times,serif" font-size="14.00">Article</text>
+<polygon fill="lightgray" stroke="black" stroke-width="2" points="438.6,-242.4 384.6,-242.4 384.6,-206.4 438.6,-206.4 438.6,-242.4"/>
+<text xml:space="preserve" text-anchor="middle" x="411.6" y="-220.2" font-family="Times,serif" font-size="14.00">Article</text>
 </a>
 </g>
 </g>
 <!-- Article&#45;&gt;Article -->
-<g id="edge13" class="edge doUpdateArticle">
+<g id="edge15" class="edge doUpdateArticle">
 <title>Article&#45;&gt;Article</title>
-<g id="a_edge13"><a xlink:href="#doUpdateArticle" xlink:title="&lt;TABLE&gt;">
-<path fill="none" stroke="#000000" stroke-width="1.3" d="M504.78,-234.07C514.57,-234.27 522.54,-231.05 522.54,-224.4 522.54,-220.76 520.16,-218.15 516.39,-216.56"/>
-<polygon fill="#000000" stroke="#000000" stroke-width="1.3" points="517.15,-213.14 506.73,-215.04 516.06,-220.05 517.15,-213.14"/>
+<g id="a_edge15"><a xlink:href="#doUpdateArticle" xlink:title="&lt;TABLE&gt;">
+<path fill="none" stroke="#000000" stroke-width="1.3" d="M438.84,-234.07C448.63,-234.27 456.6,-231.05 456.6,-224.4 456.6,-220.76 454.22,-218.15 450.46,-216.56"/>
+<polygon fill="#000000" stroke="#000000" stroke-width="1.3" points="451.21,-213.14 440.79,-215.04 450.12,-220.05 451.21,-213.14"/>
 </a>
 </g>
-<g id="a_edge13&#45;label"><a xlink:href="#doUpdateArticle" xlink:title="&lt;TABLE&gt;">
-<g id="a_edge13_0"><a xlink:href="#doUpdateArticle" xlink:title="Update Article (idempotent)">
-<text xml:space="preserve" text-anchor="start" x="522.54" y="-229.3" font-family="Times,serif" font-size="13.00" fill="#d4a000">■</text>
-<text xml:space="preserve" text-anchor="start" x="532.29" y="-229.3" font-family="Times,serif" font-size="13.00"> doUpdateArticle</text>
+<g id="a_edge15&#45;label"><a xlink:href="#doUpdateArticle" xlink:title="&lt;TABLE&gt;">
+<g id="a_edge15_0"><a xlink:href="#doUpdateArticle" xlink:title="Update Article (idempotent)">
+<text xml:space="preserve" text-anchor="start" x="456.6" y="-229.3" font-family="Times,serif" font-size="13.00" fill="#d4a000">■</text>
+<text xml:space="preserve" text-anchor="start" x="466.35" y="-229.3" font-family="Times,serif" font-size="13.00"> doUpdateArticle</text>
 </a>
 </g>
-<g id="a_edge13_1"><a xlink:href="#doPublishArticle" xlink:title="Publish Article (unsafe)">
-<text xml:space="preserve" text-anchor="start" x="522.54" y="-213.7" font-family="Times,serif" font-size="13.00" fill="#ff4136">■</text>
-<text xml:space="preserve" text-anchor="start" x="532.29" y="-213.7" font-family="Times,serif" font-size="13.00"> doPublishArticle</text>
+<g id="a_edge15_1"><a xlink:href="#doPublishArticle" xlink:title="Publish Article (unsafe)">
+<text xml:space="preserve" text-anchor="start" x="456.6" y="-213.7" font-family="Times,serif" font-size="13.00" fill="#ff4136">■</text>
+<text xml:space="preserve" text-anchor="start" x="466.35" y="-213.7" font-family="Times,serif" font-size="13.00"> doPublishArticle</text>
 </a>
 </g>
 </a>
@@ -246,8 +246,8 @@ document.addEventListener('DOMContentLoaded', function() {
 <g id="node2" class="node">
 <title>ArticleList</title>
 <g id="a_node2"><a xlink:href="#ArticleList" xlink:title="ArticleList">
-<polygon fill="lightgray" stroke="black" stroke-width="2" points="542.07,-36 467.02,-36 467.02,0 542.07,0 542.07,-36"/>
-<text xml:space="preserve" text-anchor="middle" x="504.54" y="-13.8" font-family="Times,serif" font-size="14.00">ArticleList</text>
+<polygon fill="lightgray" stroke="black" stroke-width="2" points="546.13,-36 471.08,-36 471.08,0 546.13,0 546.13,-36"/>
+<text xml:space="preserve" text-anchor="middle" x="508.6" y="-13.8" font-family="Times,serif" font-size="14.00">ArticleList</text>
 </a>
 </g>
 </g>
@@ -255,19 +255,19 @@ document.addEventListener('DOMContentLoaded', function() {
 <g id="edge1" class="edge goArticleList">
 <title>Article&#45;&gt;ArticleList</title>
 <g id="a_edge1"><a xlink:href="#goArticleList" xlink:title="&lt;TABLE&gt;">
-<path fill="none" stroke="#000000" stroke-width="1.3" d="M450.21,-210.16C411.59,-189.52 348.28,-147.42 372.53,-103.2 390.22,-70.93 426.12,-49.25 456.02,-35.97"/>
-<polygon fill="#000000" stroke="#000000" stroke-width="1.3" points="457.05,-39.34 464.9,-32.22 454.33,-32.89 457.05,-39.34"/>
+<path fill="none" stroke="#000000" stroke-width="1.3" d="M398.65,-206.17C382.18,-181.98 357.99,-137.12 376.59,-103.2 394.28,-70.93 430.18,-49.25 460.08,-35.97"/>
+<polygon fill="#000000" stroke="#000000" stroke-width="1.3" points="461.11,-39.34 468.96,-32.22 458.39,-32.89 461.11,-39.34"/>
 </a>
 </g>
 <g id="a_edge1&#45;label"><a xlink:href="#goArticleList" xlink:title="&lt;TABLE&gt;">
 <g id="a_edge1_2"><a xlink:href="#goArticleList" xlink:title="View Article List (safe)">
-<text xml:space="preserve" text-anchor="start" x="372.53" y="-126.1" font-family="Times,serif" font-size="13.00" fill="#00a86b">■</text>
-<text xml:space="preserve" text-anchor="start" x="382.28" y="-126.1" font-family="Times,serif" font-size="13.00"> goArticleList</text>
+<text xml:space="preserve" text-anchor="start" x="376.59" y="-126.1" font-family="Times,serif" font-size="13.00" fill="#00a86b">■</text>
+<text xml:space="preserve" text-anchor="start" x="386.34" y="-126.1" font-family="Times,serif" font-size="13.00"> goArticleList</text>
 </a>
 </g>
 <g id="a_edge1_3"><a xlink:href="#doDeleteArticle" xlink:title="Delete Article (idempotent)">
-<text xml:space="preserve" text-anchor="start" x="372.53" y="-110.5" font-family="Times,serif" font-size="13.00" fill="#d4a000">■</text>
-<text xml:space="preserve" text-anchor="start" x="382.28" y="-110.5" font-family="Times,serif" font-size="13.00"> doDeleteArticle</text>
+<text xml:space="preserve" text-anchor="start" x="376.59" y="-110.5" font-family="Times,serif" font-size="13.00" fill="#d4a000">■</text>
+<text xml:space="preserve" text-anchor="start" x="386.34" y="-110.5" font-family="Times,serif" font-size="13.00"> doDeleteArticle</text>
 </a>
 </g>
 </a>
@@ -277,8 +277,8 @@ document.addEventListener('DOMContentLoaded', function() {
 <g id="node3" class="node">
 <title>Category</title>
 <g id="a_node3"><a xlink:href="#Category" xlink:title="Category">
-<polygon fill="lightgray" stroke="black" stroke-width="2" points="183.4,-139.2 117.68,-139.2 117.68,-103.2 183.4,-103.2 183.4,-139.2"/>
-<text xml:space="preserve" text-anchor="middle" x="150.54" y="-117" font-family="Times,serif" font-size="14.00">Category</text>
+<polygon fill="lightgray" stroke="black" stroke-width="2" points="187.46,-139.2 121.74,-139.2 121.74,-103.2 187.46,-103.2 187.46,-139.2"/>
+<text xml:space="preserve" text-anchor="middle" x="154.6" y="-117" font-family="Times,serif" font-size="14.00">Category</text>
 </a>
 </g>
 </g>
@@ -286,14 +286,14 @@ document.addEventListener('DOMContentLoaded', function() {
 <g id="edge7" class="edge goCategory">
 <title>Article&#45;&gt;Category</title>
 <g id="a_edge7"><a xlink:href="#goCategory" xlink:title="&lt;TABLE&gt;">
-<path fill="none" stroke="#999999" stroke-width="1.3" stroke-opacity="0.466667" d="M450.12,-221.38C410.69,-217.87 336.08,-208.94 275.89,-188.4 244.65,-177.74 211.73,-160.07 187.47,-145.67"/>
-<polygon fill="#999999" fill-opacity="0.466667" stroke="#999999" stroke-width="1.3" stroke-opacity="0.466667" points="189.35,-142.72 178.98,-140.54 185.73,-148.71 189.35,-142.72"/>
+<path fill="none" stroke="#999999" stroke-width="1.3" stroke-opacity="0.466667" d="M384.31,-218.03C357.27,-212.28 314.97,-202.1 279.95,-188.4 249.8,-176.61 217.54,-159.46 193.3,-145.57"/>
+<polygon fill="#999999" fill-opacity="0.466667" stroke="#999999" stroke-width="1.3" stroke-opacity="0.466667" points="195.21,-142.63 184.8,-140.63 191.69,-148.68 195.21,-142.63"/>
 </a>
 </g>
 <g id="a_edge7&#45;label"><a xlink:href="#goCategory" xlink:title="&lt;TABLE&gt;">
 <g id="a_edge7_4"><a xlink:href="#goCategory" xlink:title="View Category (safe)">
-<text xml:space="preserve" text-anchor="start" x="275.89" y="-169.9" font-family="Times,serif" font-size="13.00" fill="#00a86b">■</text>
-<text xml:space="preserve" text-anchor="start" x="285.64" y="-169.9" font-family="Times,serif" font-size="13.00"> goCategory</text>
+<text xml:space="preserve" text-anchor="start" x="279.95" y="-169.9" font-family="Times,serif" font-size="13.00" fill="#00a86b">■</text>
+<text xml:space="preserve" text-anchor="start" x="289.7" y="-169.9" font-family="Times,serif" font-size="13.00"> goCategory</text>
 </a>
 </g>
 </a>
@@ -303,23 +303,23 @@ document.addEventListener('DOMContentLoaded', function() {
 <g id="node7" class="node">
 <title>Author</title>
 <g id="a_node7"><a xlink:href="#Author" xlink:title="Author">
-<polygon fill="lightgray" stroke="black" stroke-width="2" points="531.57,-139.2 477.51,-139.2 477.51,-103.2 531.57,-103.2 531.57,-139.2"/>
-<text xml:space="preserve" text-anchor="middle" x="504.54" y="-117" font-family="Times,serif" font-size="14.00">Author</text>
+<polygon fill="lightgray" stroke="black" stroke-width="2" points="535.63,-139.2 481.57,-139.2 481.57,-103.2 535.63,-103.2 535.63,-139.2"/>
+<text xml:space="preserve" text-anchor="middle" x="508.6" y="-117" font-family="Times,serif" font-size="14.00">Author</text>
 </a>
 </g>
 </g>
 <!-- Article&#45;&gt;Author -->
-<g id="edge11" class="edge goAuthor">
+<g id="edge12" class="edge goAuthor">
 <title>Article&#45;&gt;Author</title>
-<g id="a_edge11"><a xlink:href="#goAuthor" xlink:title="&lt;TABLE&gt;">
-<path fill="none" stroke="#999999" stroke-width="1.3" stroke-opacity="0.466667" d="M482.12,-206.23C486.16,-191.11 492.11,-168.78 496.87,-150.94"/>
-<polygon fill="#999999" fill-opacity="0.466667" stroke="#999999" stroke-width="1.3" stroke-opacity="0.466667" points="500.24,-151.92 499.43,-141.35 493.47,-150.11 500.24,-151.92"/>
+<g id="a_edge12"><a xlink:href="#goAuthor" xlink:title="&lt;TABLE&gt;">
+<path fill="none" stroke="#999999" stroke-width="1.3" stroke-opacity="0.466667" d="M428.06,-206.23C443.39,-190.24 466.45,-166.18 483.97,-147.9"/>
+<polygon fill="#999999" fill-opacity="0.466667" stroke="#999999" stroke-width="1.3" stroke-opacity="0.466667" points="486.31,-150.51 490.71,-140.87 481.26,-145.67 486.31,-150.51"/>
 </a>
 </g>
-<g id="a_edge11&#45;label"><a xlink:href="#goAuthor" xlink:title="&lt;TABLE&gt;">
-<g id="a_edge11_5"><a xlink:href="#goAuthor" xlink:title="View Author (safe)">
-<text xml:space="preserve" text-anchor="start" x="495.04" y="-169.9" font-family="Times,serif" font-size="13.00" fill="#00a86b">■</text>
-<text xml:space="preserve" text-anchor="start" x="504.79" y="-169.9" font-family="Times,serif" font-size="13.00"> goAuthor</text>
+<g id="a_edge12&#45;label"><a xlink:href="#goAuthor" xlink:title="&lt;TABLE&gt;">
+<g id="a_edge12_5"><a xlink:href="#goAuthor" xlink:title="View Author (safe)">
+<text xml:space="preserve" text-anchor="start" x="474.46" y="-169.9" font-family="Times,serif" font-size="13.00" fill="#00a86b">■</text>
+<text xml:space="preserve" text-anchor="start" x="484.21" y="-169.9" font-family="Times,serif" font-size="13.00"> goAuthor</text>
 </a>
 </g>
 </a>
@@ -329,19 +329,19 @@ document.addEventListener('DOMContentLoaded', function() {
 <g id="edge5" class="edge goArticle">
 <title>ArticleList&#45;&gt;Article</title>
 <g id="a_edge5"><a xlink:href="#goArticle" xlink:title="&lt;TABLE&gt;">
-<path fill="none" stroke="#000000" stroke-width="1.3" d="M542.44,-29.7C597.86,-47.4 691.11,-86.17 658.54,-139.2 628.12,-188.74 559.86,-209.51 516.41,-217.94"/>
-<polygon fill="#000000" stroke="#000000" stroke-width="1.3" points="516.03,-214.45 506.8,-219.66 517.26,-221.34 516.03,-214.45"/>
+<path fill="none" stroke="#000000" stroke-width="1.3" d="M546.56,-29.89C602.64,-47.98 697.44,-87.42 662.6,-139.2 615.99,-208.48 509.13,-221.83 451.01,-223.75"/>
+<polygon fill="#000000" stroke="#000000" stroke-width="1.3" points="450.93,-220.25 441.01,-223.96 451.08,-227.25 450.93,-220.25"/>
 </a>
 </g>
 <g id="a_edge5&#45;label"><a xlink:href="#goArticle" xlink:title="&lt;TABLE&gt;">
 <g id="a_edge5_6"><a xlink:href="#goArticle" xlink:title="View Article (safe)">
-<text xml:space="preserve" text-anchor="start" x="665.27" y="-126.1" font-family="Times,serif" font-size="13.00" fill="#00a86b">■</text>
-<text xml:space="preserve" text-anchor="start" x="675.02" y="-126.1" font-family="Times,serif" font-size="13.00"> goArticle</text>
+<text xml:space="preserve" text-anchor="start" x="670.09" y="-126.1" font-family="Times,serif" font-size="13.00" fill="#00a86b">■</text>
+<text xml:space="preserve" text-anchor="start" x="679.84" y="-126.1" font-family="Times,serif" font-size="13.00"> goArticle</text>
 </a>
 </g>
 <g id="a_edge5_7"><a xlink:href="#doCreateArticle" xlink:title="Create Article (unsafe)">
-<text xml:space="preserve" text-anchor="start" x="665.27" y="-110.5" font-family="Times,serif" font-size="13.00" fill="#ff4136">■</text>
-<text xml:space="preserve" text-anchor="start" x="675.02" y="-110.5" font-family="Times,serif" font-size="13.00"> doCreateArticle</text>
+<text xml:space="preserve" text-anchor="start" x="670.09" y="-110.5" font-family="Times,serif" font-size="13.00" fill="#ff4136">■</text>
+<text xml:space="preserve" text-anchor="start" x="679.84" y="-110.5" font-family="Times,serif" font-size="13.00"> doCreateArticle</text>
 </a>
 </g>
 </a>
@@ -351,31 +351,31 @@ document.addEventListener('DOMContentLoaded', function() {
 <g id="edge2" class="edge goArticleList">
 <title>Category&#45;&gt;ArticleList</title>
 <g id="a_edge2"><a xlink:href="#goArticleList" xlink:title="&lt;TABLE&gt;">
-<path fill="none" stroke="#999999" stroke-width="1.3" stroke-opacity="0.466667" d="M183.78,-112.93C202.92,-107.56 226.65,-98.78 244.54,-85.2 258.2,-74.83 252.56,-62.88 267.23,-54 297.89,-35.44 394.62,-26.01 454.7,-21.83"/>
-<polygon fill="#999999" fill-opacity="0.466667" stroke="#999999" stroke-width="1.3" stroke-opacity="0.466667" points="454.86,-25.33 464.6,-21.17 454.39,-18.34 454.86,-25.33"/>
+<path fill="none" stroke="#999999" stroke-width="1.3" stroke-opacity="0.466667" d="M187.84,-112.93C206.98,-107.56 230.71,-98.78 248.6,-85.2 262.26,-74.83 256.62,-62.88 271.29,-54 301.95,-35.44 398.68,-26.01 458.76,-21.83"/>
+<polygon fill="#999999" fill-opacity="0.466667" stroke="#999999" stroke-width="1.3" stroke-opacity="0.466667" points="458.92,-25.33 468.66,-21.17 458.45,-18.34 458.92,-25.33"/>
 </a>
 </g>
 <g id="a_edge2&#45;label"><a xlink:href="#goArticleList" xlink:title="&lt;TABLE&gt;">
 <g id="a_edge2_8"><a xlink:href="#goArticleList" xlink:title="View Article List (safe)">
-<text xml:space="preserve" text-anchor="start" x="267.23" y="-66.7" font-family="Times,serif" font-size="13.00" fill="#00a86b">■</text>
-<text xml:space="preserve" text-anchor="start" x="276.98" y="-66.7" font-family="Times,serif" font-size="13.00"> goArticleList</text>
+<text xml:space="preserve" text-anchor="start" x="271.29" y="-66.7" font-family="Times,serif" font-size="13.00" fill="#00a86b">■</text>
+<text xml:space="preserve" text-anchor="start" x="281.04" y="-66.7" font-family="Times,serif" font-size="13.00"> goArticleList</text>
 </a>
 </g>
 </a>
 </g>
 </g>
 <!-- Category&#45;&gt;Category -->
-<g id="edge14" class="edge doUpdateCategory">
+<g id="edge16" class="edge doUpdateCategory">
 <title>Category&#45;&gt;Category</title>
-<g id="a_edge14"><a xlink:href="#doUpdateCategory" xlink:title="&lt;TABLE&gt;">
-<path fill="none" stroke="#000000" stroke-width="1.3" d="M183.8,-130.85C193.7,-130.57 201.4,-127.35 201.4,-121.2 201.4,-117.84 199.1,-115.35 195.39,-113.74"/>
-<polygon fill="#000000" stroke="#000000" stroke-width="1.3" points="196.21,-110.34 185.74,-111.91 194.91,-117.21 196.21,-110.34"/>
+<g id="a_edge16"><a xlink:href="#doUpdateCategory" xlink:title="&lt;TABLE&gt;">
+<path fill="none" stroke="#000000" stroke-width="1.3" d="M187.86,-130.85C197.76,-130.57 205.46,-127.35 205.46,-121.2 205.46,-117.84 203.16,-115.35 199.45,-113.74"/>
+<polygon fill="#000000" stroke="#000000" stroke-width="1.3" points="200.27,-110.34 189.8,-111.91 198.97,-117.21 200.27,-110.34"/>
 </a>
 </g>
-<g id="a_edge14&#45;label"><a xlink:href="#doUpdateCategory" xlink:title="&lt;TABLE&gt;">
-<g id="a_edge14_9"><a xlink:href="#doUpdateCategory" xlink:title="Update Category (idempotent)">
-<text xml:space="preserve" text-anchor="start" x="201.4" y="-118.3" font-family="Times,serif" font-size="13.00" fill="#d4a000">■</text>
-<text xml:space="preserve" text-anchor="start" x="211.15" y="-118.3" font-family="Times,serif" font-size="13.00"> doUpdateCategory</text>
+<g id="a_edge16&#45;label"><a xlink:href="#doUpdateCategory" xlink:title="&lt;TABLE&gt;">
+<g id="a_edge16_9"><a xlink:href="#doUpdateCategory" xlink:title="Update Category (idempotent)">
+<text xml:space="preserve" text-anchor="start" x="205.46" y="-118.3" font-family="Times,serif" font-size="13.00" fill="#d4a000">■</text>
+<text xml:space="preserve" text-anchor="start" x="215.21" y="-118.3" font-family="Times,serif" font-size="13.00"> doUpdateCategory</text>
 </a>
 </g>
 </a>
@@ -385,8 +385,8 @@ document.addEventListener('DOMContentLoaded', function() {
 <g id="node4" class="node">
 <title>CategoryList</title>
 <g id="a_node4"><a xlink:href="#CategoryList" xlink:title="CategoryList">
-<polygon fill="lightgray" stroke="black" stroke-width="2" points="114.29,-36 26.79,-36 26.79,0 114.29,0 114.29,-36"/>
-<text xml:space="preserve" text-anchor="middle" x="70.54" y="-13.8" font-family="Times,serif" font-size="14.00">CategoryList</text>
+<polygon fill="lightgray" stroke="black" stroke-width="2" points="118.35,-36 30.85,-36 30.85,0 118.35,0 118.35,-36"/>
+<text xml:space="preserve" text-anchor="middle" x="74.6" y="-13.8" font-family="Times,serif" font-size="14.00">CategoryList</text>
 </a>
 </g>
 </g>
@@ -394,19 +394,19 @@ document.addEventListener('DOMContentLoaded', function() {
 <g id="edge6" class="edge goCategoryList">
 <title>Category&#45;&gt;CategoryList</title>
 <g id="a_edge6"><a xlink:href="#goCategoryList" xlink:title="&lt;TABLE&gt;">
-<path fill="none" stroke="#000000" stroke-width="1.3" d="M117.49,-116.89C79.19,-112.28 19.58,-102.5 5.97,-85.2 -2.61,-74.3 -1.13,-65.91 5.97,-54 8.83,-49.19 12.62,-44.99 16.92,-41.35"/>
-<polygon fill="#000000" stroke="#000000" stroke-width="1.3" points="18.64,-44.42 24.75,-35.77 14.58,-38.72 18.64,-44.42"/>
+<path fill="none" stroke="#000000" stroke-width="1.3" d="M147.1,-102.76C140.54,-88.72 130.14,-68.92 117.6,-54 114.77,-50.63 111.59,-47.35 108.26,-44.24"/>
+<polygon fill="#000000" stroke="#000000" stroke-width="1.3" points="110.59,-41.63 100.75,-37.71 106,-46.91 110.59,-41.63"/>
 </a>
 </g>
 <g id="a_edge6&#45;label"><a xlink:href="#goCategoryList" xlink:title="&lt;TABLE&gt;">
 <g id="a_edge6_10"><a xlink:href="#goCategoryList" xlink:title="View Category List (safe)">
-<text xml:space="preserve" text-anchor="start" x="5.97" y="-74.5" font-family="Times,serif" font-size="13.00" fill="#00a86b">■</text>
-<text xml:space="preserve" text-anchor="start" x="15.72" y="-74.5" font-family="Times,serif" font-size="13.00"> goCategoryList</text>
+<text xml:space="preserve" text-anchor="start" x="138.13" y="-74.5" font-family="Times,serif" font-size="13.00" fill="#00a86b">■</text>
+<text xml:space="preserve" text-anchor="start" x="147.88" y="-74.5" font-family="Times,serif" font-size="13.00"> goCategoryList</text>
 </a>
 </g>
 <g id="a_edge6_11"><a xlink:href="#doDeleteCategory" xlink:title="Delete Category (idempotent)">
-<text xml:space="preserve" text-anchor="start" x="5.97" y="-58.9" font-family="Times,serif" font-size="13.00" fill="#d4a000">■</text>
-<text xml:space="preserve" text-anchor="start" x="15.72" y="-58.9" font-family="Times,serif" font-size="13.00"> doDeleteCategory</text>
+<text xml:space="preserve" text-anchor="start" x="138.13" y="-58.9" font-family="Times,serif" font-size="13.00" fill="#d4a000">■</text>
+<text xml:space="preserve" text-anchor="start" x="147.88" y="-58.9" font-family="Times,serif" font-size="13.00"> doDeleteCategory</text>
 </a>
 </g>
 </a>
@@ -416,19 +416,19 @@ document.addEventListener('DOMContentLoaded', function() {
 <g id="edge8" class="edge goCategory">
 <title>CategoryList&#45;&gt;Category</title>
 <g id="a_edge8"><a xlink:href="#goCategory" xlink:title="&lt;TABLE&gt;">
-<path fill="none" stroke="#000000" stroke-width="1.3" d="M95.2,-36.42C101.62,-41.63 108.22,-47.66 113.54,-54 123.14,-65.42 131.49,-79.7 137.81,-92.07"/>
-<polygon fill="#000000" stroke="#000000" stroke-width="1.3" points="134.64,-93.54 142.17,-100.99 140.93,-90.47 134.64,-93.54"/>
+<path fill="none" stroke="#000000" stroke-width="1.3" d="M30.56,-32.57C20.84,-37.7 11.75,-44.65 6.03,-54 -1.21,-65.83 -2.58,-74.33 6.03,-85.2 18.79,-101.31 70.61,-110.75 109.49,-115.68"/>
+<polygon fill="#000000" stroke="#000000" stroke-width="1.3" points="109.04,-119.15 119.38,-116.87 109.87,-112.2 109.04,-119.15"/>
 </a>
 </g>
 <g id="a_edge8&#45;label"><a xlink:href="#goCategory" xlink:title="&lt;TABLE&gt;">
 <g id="a_edge8_12"><a xlink:href="#goCategory" xlink:title="View Category (safe)">
-<text xml:space="preserve" text-anchor="start" x="134.06" y="-74.5" font-family="Times,serif" font-size="13.00" fill="#00a86b">■</text>
-<text xml:space="preserve" text-anchor="start" x="143.81" y="-74.5" font-family="Times,serif" font-size="13.00"> goCategory</text>
+<text xml:space="preserve" text-anchor="start" x="6.03" y="-74.5" font-family="Times,serif" font-size="13.00" fill="#00a86b">■</text>
+<text xml:space="preserve" text-anchor="start" x="15.78" y="-74.5" font-family="Times,serif" font-size="13.00"> goCategory</text>
 </a>
 </g>
 <g id="a_edge8_13"><a xlink:href="#doCreateCategory" xlink:title="Create Category (unsafe)">
-<text xml:space="preserve" text-anchor="start" x="134.06" y="-58.9" font-family="Times,serif" font-size="13.00" fill="#ff4136">■</text>
-<text xml:space="preserve" text-anchor="start" x="143.81" y="-58.9" font-family="Times,serif" font-size="13.00"> doCreateCategory</text>
+<text xml:space="preserve" text-anchor="start" x="6.03" y="-58.9" font-family="Times,serif" font-size="13.00" fill="#ff4136">■</text>
+<text xml:space="preserve" text-anchor="start" x="15.78" y="-58.9" font-family="Times,serif" font-size="13.00"> doCreateCategory</text>
 </a>
 </g>
 </a>
@@ -438,8 +438,8 @@ document.addEventListener('DOMContentLoaded', function() {
 <g id="node5" class="node">
 <title>Tag</title>
 <g id="a_node5"><a xlink:href="#Tag" xlink:title="Tag">
-<polygon fill="lightgray" stroke="black" stroke-width="2" points="853.54,-139.2 799.54,-139.2 799.54,-103.2 853.54,-103.2 853.54,-139.2"/>
-<text xml:space="preserve" text-anchor="middle" x="826.54" y="-117" font-family="Times,serif" font-size="14.00">Tag</text>
+<polygon fill="lightgray" stroke="black" stroke-width="2" points="857.6,-139.2 803.6,-139.2 803.6,-103.2 857.6,-103.2 857.6,-139.2"/>
+<text xml:space="preserve" text-anchor="middle" x="830.6" y="-117" font-family="Times,serif" font-size="14.00">Tag</text>
 </a>
 </g>
 </g>
@@ -447,14 +447,14 @@ document.addEventListener('DOMContentLoaded', function() {
 <g id="edge3" class="edge goArticleList">
 <title>Tag&#45;&gt;ArticleList</title>
 <g id="a_edge3"><a xlink:href="#goArticleList" xlink:title="&lt;TABLE&gt;">
-<path fill="none" stroke="#999999" stroke-width="1.3" stroke-opacity="0.466667" d="M799.3,-108.58C794.73,-106.72 790.02,-104.87 785.54,-103.2 761.71,-94.32 753.12,-98.13 731.23,-85.2 713.66,-74.82 715.8,-63.12 697.54,-54 652.31,-31.4 594.61,-23.24 554.13,-20.38"/>
-<polygon fill="#999999" fill-opacity="0.466667" stroke="#999999" stroke-width="1.3" stroke-opacity="0.466667" points="554.58,-16.9 544.38,-19.78 554.15,-23.89 554.58,-16.9"/>
+<path fill="none" stroke="#999999" stroke-width="1.3" stroke-opacity="0.466667" d="M803.37,-108.58C798.79,-106.72 794.08,-104.87 789.6,-103.2 765.77,-94.32 757.18,-98.13 735.29,-85.2 717.72,-74.82 719.86,-63.12 701.6,-54 656.37,-31.4 598.67,-23.24 558.19,-20.38"/>
+<polygon fill="#999999" fill-opacity="0.466667" stroke="#999999" stroke-width="1.3" stroke-opacity="0.466667" points="558.64,-16.9 548.44,-19.78 558.21,-23.89 558.64,-16.9"/>
 </a>
 </g>
 <g id="a_edge3&#45;label"><a xlink:href="#goArticleList" xlink:title="&lt;TABLE&gt;">
 <g id="a_edge3_14"><a xlink:href="#goArticleList" xlink:title="View Article List (safe)">
-<text xml:space="preserve" text-anchor="start" x="731.23" y="-66.7" font-family="Times,serif" font-size="13.00" fill="#00a86b">■</text>
-<text xml:space="preserve" text-anchor="start" x="740.98" y="-66.7" font-family="Times,serif" font-size="13.00"> goArticleList</text>
+<text xml:space="preserve" text-anchor="start" x="735.29" y="-66.7" font-family="Times,serif" font-size="13.00" fill="#00a86b">■</text>
+<text xml:space="preserve" text-anchor="start" x="745.04" y="-66.7" font-family="Times,serif" font-size="13.00"> goArticleList</text>
 </a>
 </g>
 </a>
@@ -464,8 +464,8 @@ document.addEventListener('DOMContentLoaded', function() {
 <g id="node6" class="node">
 <title>TagList</title>
 <g id="a_node6"><a xlink:href="#TagList" xlink:title="TagList">
-<polygon fill="lightgray" stroke="black" stroke-width="2" points="905.51,-36 847.57,-36 847.57,0 905.51,0 905.51,-36"/>
-<text xml:space="preserve" text-anchor="middle" x="876.54" y="-13.8" font-family="Times,serif" font-size="14.00">TagList</text>
+<polygon fill="lightgray" stroke="black" stroke-width="2" points="909.58,-36 851.63,-36 851.63,0 909.58,0 909.58,-36"/>
+<text xml:space="preserve" text-anchor="middle" x="880.6" y="-13.8" font-family="Times,serif" font-size="14.00">TagList</text>
 </a>
 </g>
 </g>
@@ -473,19 +473,19 @@ document.addEventListener('DOMContentLoaded', function() {
 <g id="edge9" class="edge goTagList">
 <title>Tag&#45;&gt;TagList</title>
 <g id="a_edge9"><a xlink:href="#goTagList" xlink:title="&lt;TABLE&gt;">
-<path fill="none" stroke="#000000" stroke-width="1.3" d="M853.99,-107.06C856.87,-105.73 859.76,-104.43 862.54,-103.2 881.88,-94.69 894.77,-102.74 906.54,-85.2 914.27,-73.69 911.35,-67.01 906.54,-54 905.5,-51.18 904.11,-48.43 902.51,-45.79"/>
-<polygon fill="#000000" stroke="#000000" stroke-width="1.3" points="905.41,-43.83 896.67,-37.85 899.77,-47.98 905.41,-43.83"/>
+<path fill="none" stroke="#000000" stroke-width="1.3" d="M857.84,-116.09C876.15,-111.76 898.99,-102.96 910.6,-85.2 918.19,-73.59 915.41,-67.01 910.6,-54 909.56,-51.18 908.17,-48.43 906.57,-45.79"/>
+<polygon fill="#000000" stroke="#000000" stroke-width="1.3" points="909.47,-43.83 900.73,-37.85 903.83,-47.98 909.47,-43.83"/>
 </a>
 </g>
 <g id="a_edge9&#45;label"><a xlink:href="#goTagList" xlink:title="&lt;TABLE&gt;">
 <g id="a_edge9_15"><a xlink:href="#goTagList" xlink:title="View Tag List (safe)">
-<text xml:space="preserve" text-anchor="start" x="911.31" y="-74.5" font-family="Times,serif" font-size="13.00" fill="#00a86b">■</text>
-<text xml:space="preserve" text-anchor="start" x="921.06" y="-74.5" font-family="Times,serif" font-size="13.00"> goTagList</text>
+<text xml:space="preserve" text-anchor="start" x="915.31" y="-74.5" font-family="Times,serif" font-size="13.00" fill="#00a86b">■</text>
+<text xml:space="preserve" text-anchor="start" x="925.06" y="-74.5" font-family="Times,serif" font-size="13.00"> goTagList</text>
 </a>
 </g>
 <g id="a_edge9_16"><a xlink:href="#doDeleteTag" xlink:title="Delete Tag (idempotent)">
-<text xml:space="preserve" text-anchor="start" x="911.31" y="-58.9" font-family="Times,serif" font-size="13.00" fill="#d4a000">■</text>
-<text xml:space="preserve" text-anchor="start" x="921.06" y="-58.9" font-family="Times,serif" font-size="13.00"> doDeleteTag</text>
+<text xml:space="preserve" text-anchor="start" x="915.31" y="-58.9" font-family="Times,serif" font-size="13.00" fill="#d4a000">■</text>
+<text xml:space="preserve" text-anchor="start" x="925.06" y="-58.9" font-family="Times,serif" font-size="13.00"> doDeleteTag</text>
 </a>
 </g>
 </a>
@@ -495,19 +495,19 @@ document.addEventListener('DOMContentLoaded', function() {
 <g id="edge10" class="edge goTag">
 <title>TagList&#45;&gt;Tag</title>
 <g id="a_edge10"><a xlink:href="#goTag" xlink:title="&lt;TABLE&gt;">
-<path fill="none" stroke="#000000" stroke-width="1.3" d="M847.27,-30.87C837.57,-36.38 827.87,-43.97 822.41,-54 816.3,-65.23 816.26,-79.16 818.19,-91.35"/>
-<polygon fill="#000000" stroke="#000000" stroke-width="1.3" points="814.7,-91.8 820.2,-100.86 821.55,-90.35 814.7,-91.8"/>
+<path fill="none" stroke="#000000" stroke-width="1.3" d="M851.33,-30.87C841.63,-36.38 831.93,-43.97 826.47,-54 820.36,-65.23 820.32,-79.16 822.25,-91.35"/>
+<polygon fill="#000000" stroke="#000000" stroke-width="1.3" points="818.76,-91.8 824.26,-100.86 825.61,-90.35 818.76,-91.8"/>
 </a>
 </g>
 <g id="a_edge10&#45;label"><a xlink:href="#goTag" xlink:title="&lt;TABLE&gt;">
 <g id="a_edge10_17"><a xlink:href="#goTag" xlink:title="View Tag (safe)">
-<text xml:space="preserve" text-anchor="start" x="822.41" y="-74.5" font-family="Times,serif" font-size="13.00" fill="#00a86b">■</text>
-<text xml:space="preserve" text-anchor="start" x="832.16" y="-74.5" font-family="Times,serif" font-size="13.00"> goTag</text>
+<text xml:space="preserve" text-anchor="start" x="826.47" y="-74.5" font-family="Times,serif" font-size="13.00" fill="#00a86b">■</text>
+<text xml:space="preserve" text-anchor="start" x="836.22" y="-74.5" font-family="Times,serif" font-size="13.00"> goTag</text>
 </a>
 </g>
 <g id="a_edge10_18"><a xlink:href="#doCreateTag" xlink:title="Create Tag (unsafe)">
-<text xml:space="preserve" text-anchor="start" x="822.41" y="-58.9" font-family="Times,serif" font-size="13.00" fill="#ff4136">■</text>
-<text xml:space="preserve" text-anchor="start" x="832.16" y="-58.9" font-family="Times,serif" font-size="13.00"> doCreateTag</text>
+<text xml:space="preserve" text-anchor="start" x="826.47" y="-58.9" font-family="Times,serif" font-size="13.00" fill="#ff4136">■</text>
+<text xml:space="preserve" text-anchor="start" x="836.22" y="-58.9" font-family="Times,serif" font-size="13.00"> doCreateTag</text>
 </a>
 </g>
 </a>
@@ -517,107 +517,138 @@ document.addEventListener('DOMContentLoaded', function() {
 <g id="edge4" class="edge goArticleList">
 <title>Author&#45;&gt;ArticleList</title>
 <g id="a_edge4"><a xlink:href="#goArticleList" xlink:title="&lt;TABLE&gt;">
-<path fill="none" stroke="#999999" stroke-width="1.3" stroke-opacity="0.466667" d="M504.54,-103.03C504.54,-87.99 504.54,-65.8 504.54,-48"/>
-<polygon fill="#999999" fill-opacity="0.466667" stroke="#999999" stroke-width="1.3" stroke-opacity="0.466667" points="508.04,-48.22 504.54,-38.22 501.04,-48.22 508.04,-48.22"/>
+<path fill="none" stroke="#999999" stroke-width="1.3" stroke-opacity="0.466667" d="M508.6,-103.03C508.6,-87.99 508.6,-65.8 508.6,-48"/>
+<polygon fill="#999999" fill-opacity="0.466667" stroke="#999999" stroke-width="1.3" stroke-opacity="0.466667" points="512.1,-48.22 508.6,-38.22 505.1,-48.22 512.1,-48.22"/>
 </a>
 </g>
 <g id="a_edge4&#45;label"><a xlink:href="#goArticleList" xlink:title="&lt;TABLE&gt;">
 <g id="a_edge4_19"><a xlink:href="#goArticleList" xlink:title="View Article List (safe)">
-<text xml:space="preserve" text-anchor="start" x="504.54" y="-66.7" font-family="Times,serif" font-size="13.00" fill="#00a86b">■</text>
-<text xml:space="preserve" text-anchor="start" x="514.29" y="-66.7" font-family="Times,serif" font-size="13.00"> goArticleList</text>
+<text xml:space="preserve" text-anchor="start" x="508.6" y="-66.7" font-family="Times,serif" font-size="13.00" fill="#00a86b">■</text>
+<text xml:space="preserve" text-anchor="start" x="518.35" y="-66.7" font-family="Times,serif" font-size="13.00"> goArticleList</text>
 </a>
 </g>
 </a>
 </g>
 </g>
 <!-- Author&#45;&gt;Author -->
-<g id="edge16" class="edge doUpdateAuthor">
+<g id="edge17" class="edge doUpdateAuthor">
 <title>Author&#45;&gt;Author</title>
-<g id="a_edge16"><a xlink:href="#doUpdateAuthor" xlink:title="&lt;TABLE&gt;">
-<path fill="none" stroke="#000000" stroke-width="1.3" d="M531.8,-130.87C541.59,-131.07 549.57,-127.85 549.57,-121.2 549.57,-117.56 547.19,-114.95 543.42,-113.36"/>
-<polygon fill="#000000" stroke="#000000" stroke-width="1.3" points="544.17,-109.94 533.75,-111.84 543.08,-116.85 544.17,-109.94"/>
+<g id="a_edge17"><a xlink:href="#doUpdateAuthor" xlink:title="&lt;TABLE&gt;">
+<path fill="none" stroke="#000000" stroke-width="1.3" d="M535.86,-130.87C545.65,-131.07 553.63,-127.85 553.63,-121.2 553.63,-117.56 551.25,-114.95 547.48,-113.36"/>
+<polygon fill="#000000" stroke="#000000" stroke-width="1.3" points="548.23,-109.94 537.81,-111.84 547.14,-116.85 548.23,-109.94"/>
 </a>
 </g>
-<g id="a_edge16&#45;label"><a xlink:href="#doUpdateAuthor" xlink:title="&lt;TABLE&gt;">
-<g id="a_edge16_20"><a xlink:href="#doUpdateAuthor" xlink:title="Update Author (idempotent)">
-<text xml:space="preserve" text-anchor="start" x="549.57" y="-118.3" font-family="Times,serif" font-size="13.00" fill="#d4a000">■</text>
-<text xml:space="preserve" text-anchor="start" x="559.32" y="-118.3" font-family="Times,serif" font-size="13.00"> doUpdateAuthor</text>
+<g id="a_edge17&#45;label"><a xlink:href="#doUpdateAuthor" xlink:title="&lt;TABLE&gt;">
+<g id="a_edge17_20"><a xlink:href="#doUpdateAuthor" xlink:title="Update Author (idempotent)">
+<text xml:space="preserve" text-anchor="start" x="553.63" y="-118.3" font-family="Times,serif" font-size="13.00" fill="#d4a000">■</text>
+<text xml:space="preserve" text-anchor="start" x="563.38" y="-118.3" font-family="Times,serif" font-size="13.00"> doUpdateAuthor</text>
+</a>
+</g>
+</a>
+</g>
+</g>
+<!-- AuthorList -->
+<g id="node8" class="node">
+<title>AuthorList</title>
+<g id="a_node8"><a xlink:href="#AuthorList" xlink:title="AuthorList">
+<polygon fill="lightgray" stroke="black" stroke-width="2" points="760.52,-242.4 684.68,-242.4 684.68,-206.4 760.52,-206.4 760.52,-242.4"/>
+<text xml:space="preserve" text-anchor="middle" x="722.6" y="-220.2" font-family="Times,serif" font-size="14.00">AuthorList</text>
+</a>
+</g>
+</g>
+<!-- AuthorList&#45;&gt;Author -->
+<g id="edge13" class="edge goAuthor">
+<title>AuthorList&#45;&gt;Author</title>
+<g id="a_edge13"><a xlink:href="#goAuthor" xlink:title="&lt;TABLE&gt;">
+<path fill="none" stroke="#000000" stroke-width="1.3" d="M685.81,-206C647.01,-187.65 586.15,-158.87 546.82,-140.27"/>
+<polygon fill="#000000" stroke="#000000" stroke-width="1.3" points="548.4,-137.15 537.86,-136.04 545.41,-143.48 548.4,-137.15"/>
+</a>
+</g>
+<g id="a_edge13&#45;label"><a xlink:href="#goAuthor" xlink:title="&lt;TABLE&gt;">
+<g id="a_edge13_21"><a xlink:href="#goAuthor" xlink:title="View Author (safe)">
+<text xml:space="preserve" text-anchor="start" x="647.27" y="-177.7" font-family="Times,serif" font-size="13.00" fill="#00a86b">■</text>
+<text xml:space="preserve" text-anchor="start" x="657.02" y="-177.7" font-family="Times,serif" font-size="13.00"> goAuthor</text>
+</a>
+</g>
+<g id="a_edge13_22"><a xlink:href="#doCreateAuthor" xlink:title="Create Author (unsafe)">
+<text xml:space="preserve" text-anchor="start" x="647.27" y="-162.1" font-family="Times,serif" font-size="13.00" fill="#ff4136">■</text>
+<text xml:space="preserve" text-anchor="start" x="657.02" y="-162.1" font-family="Times,serif" font-size="13.00"> doCreateAuthor</text>
 </a>
 </g>
 </a>
 </g>
 </g>
 <!-- Media -->
-<g id="node8" class="node">
+<g id="node9" class="node">
 <title>Media</title>
-<g id="a_node8"><a xlink:href="#Media" xlink:title="Media">
-<polygon fill="lightgray" stroke="black" stroke-width="2" points="925.54,-139.2 871.54,-139.2 871.54,-103.2 925.54,-103.2 925.54,-139.2"/>
-<text xml:space="preserve" text-anchor="middle" x="898.54" y="-117" font-family="Times,serif" font-size="14.00">Media</text>
+<g id="a_node9"><a xlink:href="#Media" xlink:title="Media">
+<polygon fill="lightgray" stroke="black" stroke-width="2" points="855.6,-242.4 801.6,-242.4 801.6,-206.4 855.6,-206.4 855.6,-242.4"/>
+<text xml:space="preserve" text-anchor="middle" x="828.6" y="-220.2" font-family="Times,serif" font-size="14.00">Media</text>
 </a>
 </g>
 </g>
 <!-- Media&#45;&gt;Media -->
-<g id="edge17" class="edge doUploadMediaFile">
+<g id="edge18" class="edge doUploadMediaFile">
 <title>Media&#45;&gt;Media</title>
-<g id="a_edge17"><a xlink:href="#doUploadMediaFile" xlink:title="&lt;TABLE&gt;">
-<path fill="none" stroke="#000000" stroke-width="1.3" d="M925.78,-130.87C935.57,-131.07 943.54,-127.85 943.54,-121.2 943.54,-117.56 941.16,-114.95 937.39,-113.36"/>
-<polygon fill="#000000" stroke="#000000" stroke-width="1.3" points="938.15,-109.94 927.73,-111.84 937.06,-116.85 938.15,-109.94"/>
+<g id="a_edge18"><a xlink:href="#doUploadMediaFile" xlink:title="&lt;TABLE&gt;">
+<path fill="none" stroke="#000000" stroke-width="1.3" d="M855.84,-234.07C865.63,-234.27 873.6,-231.05 873.6,-224.4 873.6,-220.76 871.22,-218.15 867.46,-216.56"/>
+<polygon fill="#000000" stroke="#000000" stroke-width="1.3" points="868.21,-213.14 857.79,-215.04 867.12,-220.05 868.21,-213.14"/>
 </a>
 </g>
-<g id="a_edge17&#45;label"><a xlink:href="#doUploadMediaFile" xlink:title="&lt;TABLE&gt;">
-<g id="a_edge17_21"><a xlink:href="#doUploadMediaFile" xlink:title="Upload Media File (unsafe)">
-<text xml:space="preserve" text-anchor="start" x="943.54" y="-126.1" font-family="Times,serif" font-size="13.00" fill="#ff4136">■</text>
-<text xml:space="preserve" text-anchor="start" x="953.29" y="-126.1" font-family="Times,serif" font-size="13.00"> doUploadMediaFile</text>
+<g id="a_edge18&#45;label"><a xlink:href="#doUploadMediaFile" xlink:title="&lt;TABLE&gt;">
+<g id="a_edge18_23"><a xlink:href="#doUploadMediaFile" xlink:title="Upload Media File (unsafe)">
+<text xml:space="preserve" text-anchor="start" x="873.6" y="-229.3" font-family="Times,serif" font-size="13.00" fill="#ff4136">■</text>
+<text xml:space="preserve" text-anchor="start" x="883.35" y="-229.3" font-family="Times,serif" font-size="13.00"> doUploadMediaFile</text>
 </a>
 </g>
-<g id="a_edge17_22"><a xlink:href="#doDeleteMedia" xlink:title="Delete Media (idempotent)">
-<text xml:space="preserve" text-anchor="start" x="943.54" y="-110.5" font-family="Times,serif" font-size="13.00" fill="#d4a000">■</text>
-<text xml:space="preserve" text-anchor="start" x="953.29" y="-110.5" font-family="Times,serif" font-size="13.00"> doDeleteMedia</text>
+<g id="a_edge18_24"><a xlink:href="#doDeleteMedia" xlink:title="Delete Media (idempotent)">
+<text xml:space="preserve" text-anchor="start" x="873.6" y="-213.7" font-family="Times,serif" font-size="13.00" fill="#d4a000">■</text>
+<text xml:space="preserve" text-anchor="start" x="883.35" y="-213.7" font-family="Times,serif" font-size="13.00"> doDeleteMedia</text>
 </a>
 </g>
 </a>
 </g>
 </g>
 <!-- UnknownState -->
-<g id="node9" class="node">
+<g id="node10" class="node">
 <title>UnknownState</title>
-<polygon fill="lightgray" stroke="black" stroke-width="2" points="831.75,-242.4 705.34,-242.4 705.34,-206.4 831.75,-206.4 831.75,-242.4"/>
-<text xml:space="preserve" text-anchor="middle" x="768.54" y="-220.2" font-family="Times,serif" font-size="14.00">UnknownState</text>
+<polygon fill="lightgray" stroke="black" stroke-width="2" points="838.81,-345.6 712.4,-345.6 712.4,-309.6 838.81,-309.6 838.81,-345.6"/>
+<text xml:space="preserve" text-anchor="middle" x="775.6" y="-323.4" font-family="Times,serif" font-size="14.00">UnknownState</text>
 </g>
-<!-- UnknownState&#45;&gt;Author -->
-<g id="edge15" class="edge doCreateAuthor">
-<title>UnknownState&#45;&gt;Author</title>
-<g id="a_edge15"><a xlink:href="#doCreateAuthor" xlink:title="&lt;TABLE&gt;">
-<path fill="none" stroke="#000000" stroke-width="1.3" d="M723.16,-206C672.36,-186.53 590.91,-155.31 543.08,-136.97"/>
-<polygon fill="#000000" stroke="#000000" stroke-width="1.3" points="544.4,-133.73 533.81,-133.42 541.89,-140.27 544.4,-133.73"/>
+<!-- UnknownState&#45;&gt;AuthorList -->
+<g id="edge11" class="edge goAuthorList">
+<title>UnknownState&#45;&gt;AuthorList</title>
+<g id="a_edge11"><a xlink:href="#goAuthorList" xlink:title="&lt;TABLE&gt;">
+<path fill="none" stroke="#999999" stroke-width="1.3" stroke-opacity="0.466667" d="M739.64,-309.23C733.2,-304.44 727.34,-298.59 723.55,-291.6 717.53,-280.5 716.51,-266.74 717.29,-254.64"/>
+<polygon fill="#999999" fill-opacity="0.466667" stroke="#999999" stroke-width="1.3" stroke-opacity="0.466667" points="720.76,-255.11 718.42,-244.77 713.81,-254.31 720.76,-255.11"/>
 </a>
 </g>
-<g id="a_edge15&#45;label"><a xlink:href="#doCreateAuthor" xlink:title="&lt;TABLE&gt;">
-<g id="a_edge15_23"><a xlink:href="#doCreateAuthor" xlink:title="Create Author (unsafe)">
-<text xml:space="preserve" text-anchor="start" x="675.61" y="-169.9" font-family="Times,serif" font-size="13.00" fill="#ff4136">■</text>
-<text xml:space="preserve" text-anchor="start" x="685.36" y="-169.9" font-family="Times,serif" font-size="13.00"> doCreateAuthor</text>
+<g id="a_edge11&#45;label"><a xlink:href="#goAuthorList" xlink:title="&lt;TABLE&gt;">
+<g id="a_edge11_25"><a xlink:href="#goAuthorList" xlink:title="View Author List (safe)">
+<text xml:space="preserve" text-anchor="start" x="723.55" y="-273.1" font-family="Times,serif" font-size="13.00" fill="#00a86b">■</text>
+<text xml:space="preserve" text-anchor="start" x="733.3" y="-273.1" font-family="Times,serif" font-size="13.00"> goAuthorList</text>
 </a>
 </g>
 </a>
 </g>
 </g>
 <!-- UnknownState&#45;&gt;Media -->
-<g id="edge12" class="edge goMedia">
+<g id="edge14" class="edge goMedia">
 <title>UnknownState&#45;&gt;Media</title>
-<g id="a_edge12"><a xlink:href="#goMedia" xlink:title="&lt;TABLE&gt;">
-<path fill="none" stroke="#000000" stroke-width="1.3" d="M820.11,-205.97C830.43,-201.18 840.78,-195.35 849.54,-188.4 862.98,-177.74 874.58,-162.54 883.12,-149.39"/>
-<polygon fill="#000000" stroke="#000000" stroke-width="1.3" points="885.97,-151.43 888.25,-141.08 880.01,-147.75 885.97,-151.43"/>
+<g id="a_edge14"><a xlink:href="#goMedia" xlink:title="&lt;TABLE&gt;">
+<path fill="none" stroke="#000000" stroke-width="1.3" d="M793.52,-309.16C798.26,-303.86 803.04,-297.79 806.6,-291.6 813.27,-280.03 818.28,-266.15 821.81,-254.09"/>
+<polygon fill="#000000" stroke="#000000" stroke-width="1.3" points="825.12,-255.26 824.36,-244.69 818.37,-253.43 825.12,-255.26"/>
 </a>
 </g>
-<g id="a_edge12&#45;label"><a xlink:href="#goMedia" xlink:title="&lt;TABLE&gt;">
-<g id="a_edge12_24"><a xlink:href="#goMedia" xlink:title="View Media (safe)">
-<text xml:space="preserve" text-anchor="start" x="876.71" y="-177.7" font-family="Times,serif" font-size="13.00" fill="#00a86b">■</text>
-<text xml:space="preserve" text-anchor="start" x="886.46" y="-177.7" font-family="Times,serif" font-size="13.00"> goMedia</text>
+<g id="a_edge14&#45;label"><a xlink:href="#goMedia" xlink:title="&lt;TABLE&gt;">
+<g id="a_edge14_26"><a xlink:href="#goMedia" xlink:title="View Media (safe)">
+<text xml:space="preserve" text-anchor="start" x="819.38" y="-280.9" font-family="Times,serif" font-size="13.00" fill="#00a86b">■</text>
+<text xml:space="preserve" text-anchor="start" x="829.13" y="-280.9" font-family="Times,serif" font-size="13.00"> goMedia</text>
 </a>
 </g>
-<g id="a_edge12_25"><a xlink:href="#doCreateMedia" xlink:title="Upload Media (unsafe)">
-<text xml:space="preserve" text-anchor="start" x="876.71" y="-162.1" font-family="Times,serif" font-size="13.00" fill="#ff4136">■</text>
-<text xml:space="preserve" text-anchor="start" x="886.46" y="-162.1" font-family="Times,serif" font-size="13.00"> doCreateMedia</text>
+<g id="a_edge14_27"><a xlink:href="#doCreateMedia" xlink:title="Upload Media (unsafe)">
+<text xml:space="preserve" text-anchor="start" x="819.38" y="-265.3" font-family="Times,serif" font-size="13.00" fill="#ff4136">■</text>
+<text xml:space="preserve" text-anchor="start" x="829.13" y="-265.3" font-family="Times,serif" font-size="13.00"> doCreateMedia</text>
 </a>
 </g>
 </a>
@@ -721,6 +752,13 @@ document.addEventListener('DOMContentLoaded', function() {
   <td align="left"><span style="white-space: normal;">Author ID (FK)</span></td>
   <td align="left"></td>
   <td align="left"><span style="white-space: normal;"></span></td>
+</tr>
+<tr id="descriptor-AuthorList">
+  <td align="center"><span class="legend"><span class="legend-icon semantic"></span></span></td>
+  <td align="left"><a id="AuthorList"></a><a href="#AuthorList" class="descriptor-id-link">AuthorList</a></td>
+  <td align="left"><span style="white-space: normal;">Author List</span></td>
+  <td align="left"><span class="type-indicator-small semantic" title="Semantic"></span><a href="#id">id</a><br><span class="type-indicator-small semantic" title="Semantic"></span><a href="#name">name</a><br><span class="type-indicator-small semantic" title="Semantic"></span><a href="#email">email</a><br><span class="type-indicator-small semantic" title="Semantic"></span><a href="#bio">bio</a><br><span class="type-indicator-small safe" title="Safe"></span><a href="#goAuthor">goAuthor</a><br><span class="type-indicator-small unsafe" title="Unsafe"></span><a href="#doCreateAuthor">doCreateAuthor</a></td>
+  <td align="left"><span style="white-space: normal;"><span class="meta-container"><span class="meta-item"><span class="meta-label">tag:</span><span class="meta-values"><span class="meta-tag tag-tag"><a href="#tag-author">author</a></span> <span class="meta-tag tag-tag"><a href="#tag-flow-browse">flow-browse</a></span></span></span><span class="meta-item"><span class="meta-label">doc:</span><span class="meta-tag doc-tag">List of authors.</span></span></span></span></td>
 </tr>
 <tr id="descriptor-bio">
   <td align="center"><span class="legend"><span class="legend-icon semantic"></span></span></td>
@@ -910,6 +948,13 @@ document.addEventListener('DOMContentLoaded', function() {
   <td align="left"><span style="white-space: normal;">View Author</span></td>
   <td align="left"><span class="type-indicator-small semantic" title="Semantic"></span><a href="#id">id</a></td>
   <td align="left"><span style="white-space: normal;"><span class="meta-container"><span class="meta-item"><span class="meta-label">tag:</span><span class="meta-values"><span class="meta-tag tag-tag"><a href="#tag-author">author</a></span></span></span><span class="meta-item"><span class="meta-label">rt:</span><span class="meta-tag rt-tag"><a href="##Author">#Author</a></span></span></span></span></td>
+</tr>
+<tr id="descriptor-goAuthorList">
+  <td align="center"><span class="legend"><span class="legend-icon safe"></span></span></td>
+  <td align="left"><a id="goAuthorList"></a><a href="#goAuthorList" class="descriptor-id-link">goAuthorList</a></td>
+  <td align="left"><span style="white-space: normal;">View Author List</span></td>
+  <td align="left"></td>
+  <td align="left"><span style="white-space: normal;"><span class="meta-container"><span class="meta-item"><span class="meta-label">tag:</span><span class="meta-values"><span class="meta-tag tag-tag"><a href="#tag-author">author</a></span> <span class="meta-tag tag-tag"><a href="#tag-flow-browse">flow-browse</a></span></span></span><span class="meta-item"><span class="meta-label">rt:</span><span class="meta-tag rt-tag"><a href="##AuthorList">#AuthorList</a></span></span></span></span></td>
 </tr>
 <tr id="descriptor-goCategory">
   <td align="center"><span class="legend"><span class="legend-icon safe"></span></span></td>
@@ -1216,6 +1261,15 @@ document.addEventListener('DOMContentLoaded', function() {
         {&quot;href&quot;: &quot;#doUpdateAuthor&quot;}
       ], &quot;tag&quot;: &quot;author&quot;},
 
+      {&quot;id&quot;: &quot;AuthorList&quot;, &quot;title&quot;: &quot;Author List&quot;, &quot;doc&quot;: {&quot;value&quot;: &quot;List of authors.&quot;}, &quot;descriptor&quot;: [
+        {&quot;href&quot;: &quot;#id&quot;},
+        {&quot;href&quot;: &quot;#name&quot;},
+        {&quot;href&quot;: &quot;#email&quot;},
+        {&quot;href&quot;: &quot;#bio&quot;},
+        {&quot;href&quot;: &quot;#goAuthor&quot;},
+        {&quot;href&quot;: &quot;#doCreateAuthor&quot;}
+      ], &quot;tag&quot;: &quot;author flow-browse&quot;},
+
       {&quot;id&quot;: &quot;Media&quot;, &quot;title&quot;: &quot;Media Detail&quot;, &quot;descriptor&quot;: [
         {&quot;href&quot;: &quot;#id&quot;},
         {&quot;href&quot;: &quot;#filename&quot;},
@@ -1246,6 +1300,7 @@ document.addEventListener('DOMContentLoaded', function() {
       {&quot;id&quot;: &quot;goTag&quot;, &quot;type&quot;: &quot;safe&quot;, &quot;rt&quot;: &quot;#Tag&quot;, &quot;title&quot;: &quot;View Tag&quot;, &quot;tag&quot;: &quot;tag&quot;, &quot;descriptor&quot;: [
         {&quot;href&quot;: &quot;#id&quot;}
       ]},
+      {&quot;id&quot;: &quot;goAuthorList&quot;, &quot;type&quot;: &quot;safe&quot;, &quot;rt&quot;: &quot;#AuthorList&quot;, &quot;title&quot;: &quot;View Author List&quot;, &quot;tag&quot;: &quot;author flow-browse&quot;},
       {&quot;id&quot;: &quot;goAuthor&quot;, &quot;type&quot;: &quot;safe&quot;, &quot;rt&quot;: &quot;#Author&quot;, &quot;title&quot;: &quot;View Author&quot;, &quot;tag&quot;: &quot;author&quot;, &quot;descriptor&quot;: [
         {&quot;href&quot;: &quot;#id&quot;}
       ]},
@@ -1335,7 +1390,7 @@ document.addEventListener('DOMContentLoaded', function() {
 </div>
 <script>
 // Tag filtering
-const tagDescriptorMap = {"article":["Article","ArticleList","goArticleList","goArticle","doCreateArticle","doUpdateArticle","doDeleteArticle","doPublishArticle"],"author":["Author","goAuthor","doCreateAuthor","doUpdateAuthor"],"category":["Category","CategoryList","goCategoryList","goCategory","doCreateCategory","doUpdateCategory","doDeleteCategory"],"flow-browse":["ArticleList","CategoryList","TagList","goArticleList","goCategoryList","goTagList"],"flow-publish":["doCreateArticle","doUpdateArticle","doDeleteArticle","doPublishArticle"],"media":["Media","goMedia","doCreateMedia","doUploadMediaFile","doDeleteMedia"],"tag":["Tag","TagList","goTagList","goTag","doCreateTag","doDeleteTag"]};
+const tagDescriptorMap = {"article":["Article","ArticleList","goArticleList","goArticle","doCreateArticle","doUpdateArticle","doDeleteArticle","doPublishArticle"],"author":["Author","AuthorList","goAuthorList","goAuthor","doCreateAuthor","doUpdateAuthor"],"category":["Category","CategoryList","goCategoryList","goCategory","doCreateCategory","doUpdateCategory","doDeleteCategory"],"flow-browse":["ArticleList","CategoryList","TagList","AuthorList","goArticleList","goCategoryList","goTagList","goAuthorList"],"flow-publish":["doCreateArticle","doUpdateArticle","doDeleteArticle","doPublishArticle"],"media":["Media","goMedia","doCreateMedia","doUploadMediaFile","doDeleteMedia"],"tag":["Tag","TagList","goTagList","goTag","doCreateTag","doDeleteTag"]};
 
 const changeColorByTitle = (titleOrClass, newNodeColor, newEdgeColor, highlight = false) => {
     const elements = Array.from(document.getElementsByTagName('g'));
@@ -1396,7 +1451,7 @@ Object.keys(tagDescriptorMap).forEach(tag => {
 setupTagTrigger();
 
 // Label mode switching
-window.alpsData = {"alps":{"title":"BEAR.Cms Reference CMS","doc":{"value":"ALPS profile for the BEAR.Cms App resource API. Covers articles, categories, tags, authors and media with read and write transitions."},"link":[{"rel":"apidoc","href":"index.html"},{"rel":"alps","href":"alps.html"},{"rel":"diagram","href":"alps.svg"},{"rel":"openapi","href":"openapi.json"},{"rel":"llms","href":"llms.txt"},{"rel":"terms","href":"terms.html"},{"rel":"terms-markdown","href":"terms.md"},{"rel":"audit","href":"audit.md"},{"rel":"schemas","href":"schemas/"}],"descriptor":[{"id":"id","title":"Identifier","def":"https://schema.org/identifier"},{"id":"slug","title":"URL-safe Slug","doc":{"value":"Lower-case kebab-case unique identifier used in human-readable URIs."}},{"id":"name","title":"Name","def":"https://schema.org/name"},{"id":"title","title":"Title","def":"https://schema.org/headline"},{"id":"body","title":"Article Body","def":"https://schema.org/articleBody"},{"id":"excerpt","title":"Excerpt","doc":{"value":"Short summary used in list views."}},{"id":"status","title":"Lifecycle Status","doc":{"value":"draft or published."}},{"id":"publishedAt","title":"Published At","def":"https://schema.org/datePublished"},{"id":"description","title":"Description","def":"https://schema.org/description"},{"id":"email","title":"Email","def":"https://schema.org/email"},{"id":"bio","title":"Biography","def":"https://schema.org/description"},{"id":"filename","title":"Filename"},{"id":"file","title":"Uploaded File","doc":{"value":"Binary file body resolved by Ray.InputQuery #[InputFile]."}},{"id":"mimeType","title":"MIME Type","def":"https://schema.org/encodingFormat"},{"id":"url","title":"URL","def":"https://schema.org/contentUrl"},{"id":"alt","title":"Alt Text","doc":{"value":"Accessibility text describing the media."}},{"id":"width","title":"Width","def":"https://schema.org/width"},{"id":"height","title":"Height","def":"https://schema.org/height"},{"id":"authorId","title":"Author ID (FK)"},{"id":"categoryId","title":"Category ID (FK)"},{"id":"parentId","title":"Parent Category ID (self-FK)","doc":{"value":"Nullable reference for hierarchical categories."}},{"id":"tagId","title":"Tag ID (filter)"},{"id":"articleId","title":"Article ID (filter)"},{"id":"page","title":"Page Number","doc":{"value":"1-indexed pagination page."}},{"id":"perPage","title":"Per-Page Count"},{"id":"totalCount","title":"Total Count"},{"id":"Article","title":"Article Detail","doc":{"value":"Single article with embedded Author, Category and Tags."},"descriptor":[{"href":"#id"},{"href":"#slug"},{"href":"#title"},{"href":"#body"},{"href":"#excerpt"},{"href":"#status"},{"href":"#publishedAt"},{"href":"#authorId"},{"href":"#categoryId"},{"href":"#Author"},{"href":"#Category"},{"href":"#Tag"},{"href":"#goArticleList"},{"href":"#goAuthor"},{"href":"#goCategory"},{"href":"#doUpdateArticle"},{"href":"#doDeleteArticle"},{"href":"#doPublishArticle"}],"tag":"article"},{"id":"ArticleList","title":"Article List","doc":{"value":"Paginated list of articles; supports filtering by category, tag, or status."},"descriptor":[{"href":"#id"},{"href":"#slug"},{"href":"#title"},{"href":"#excerpt"},{"href":"#status"},{"href":"#publishedAt"},{"href":"#page"},{"href":"#perPage"},{"href":"#totalCount"},{"href":"#goArticle"},{"href":"#doCreateArticle"}],"tag":"article flow-browse"},{"id":"Category","title":"Category Detail","descriptor":[{"href":"#id"},{"href":"#slug"},{"href":"#name"},{"href":"#description"},{"href":"#parentId"},{"href":"#goCategoryList"},{"href":"#goArticleList"},{"href":"#doUpdateCategory"},{"href":"#doDeleteCategory"}],"tag":"category"},{"id":"CategoryList","title":"Category List","descriptor":[{"href":"#id"},{"href":"#slug"},{"href":"#name"},{"href":"#parentId"},{"href":"#goCategory"},{"href":"#doCreateCategory"}],"tag":"category flow-browse"},{"id":"Tag","title":"Tag Detail","descriptor":[{"href":"#id"},{"href":"#slug"},{"href":"#name"},{"href":"#goTagList"},{"href":"#goArticleList"},{"href":"#doDeleteTag"}],"tag":"tag"},{"id":"TagList","title":"Tag List","descriptor":[{"href":"#id"},{"href":"#slug"},{"href":"#name"},{"href":"#goTag"},{"href":"#doCreateTag"}],"tag":"tag flow-browse"},{"id":"Author","title":"Author Detail","descriptor":[{"href":"#id"},{"href":"#name"},{"href":"#email"},{"href":"#bio"},{"href":"#goArticleList"},{"href":"#doUpdateAuthor"}],"tag":"author"},{"id":"Media","title":"Media Detail","descriptor":[{"href":"#id"},{"href":"#filename"},{"href":"#mimeType"},{"href":"#url"},{"href":"#alt"},{"href":"#width"},{"href":"#height"},{"href":"#doUploadMediaFile"},{"href":"#doDeleteMedia"}],"tag":"media"},{"id":"goArticleList","type":"safe","rt":"#ArticleList","title":"View Article List","doc":{"value":"List published articles, filterable by category, tag or status."},"tag":"article flow-browse","descriptor":[{"href":"#page"},{"href":"#perPage"},{"href":"#categoryId"},{"href":"#tagId"},{"href":"#status"}]},{"id":"goArticle","type":"safe","rt":"#Article","title":"View Article","doc":{"value":"Retrieve a single article by id with embedded Author/Category/Tags."},"tag":"article","descriptor":[{"href":"#id"}]},{"id":"goCategoryList","type":"safe","rt":"#CategoryList","title":"View Category List","tag":"category flow-browse"},{"id":"goCategory","type":"safe","rt":"#Category","title":"View Category","tag":"category","descriptor":[{"href":"#id"}]},{"id":"goTagList","type":"safe","rt":"#TagList","title":"View Tag List","tag":"tag flow-browse"},{"id":"goTag","type":"safe","rt":"#Tag","title":"View Tag","tag":"tag","descriptor":[{"href":"#id"}]},{"id":"goAuthor","type":"safe","rt":"#Author","title":"View Author","tag":"author","descriptor":[{"href":"#id"}]},{"id":"goMedia","type":"safe","rt":"#Media","title":"View Media","tag":"media","descriptor":[{"href":"#id"}]},{"id":"doCreateArticle","type":"unsafe","rt":"#Article","title":"Create Article","doc":{"value":"Create a new article. Returns the created article detail."},"tag":"article flow-publish","descriptor":[{"href":"#slug"},{"href":"#title"},{"href":"#body"},{"href":"#excerpt"},{"href":"#status"},{"href":"#authorId"},{"href":"#categoryId"}]},{"id":"doUpdateArticle","type":"idempotent","rt":"#Article","title":"Update Article","tag":"article flow-publish","descriptor":[{"href":"#id"},{"href":"#title"},{"href":"#body"},{"href":"#excerpt"},{"href":"#status"}]},{"id":"doDeleteArticle","type":"idempotent","rt":"#ArticleList","title":"Delete Article","tag":"article flow-publish","descriptor":[{"href":"#id"}]},{"id":"doPublishArticle","type":"unsafe","rt":"#Article","title":"Publish Article","doc":{"value":"Move a draft article to published. Non-idempotent: a second call on an already-published article returns 409 Conflict (the state machine guards against re-publishing)."},"tag":"article flow-publish","descriptor":[{"href":"#id"},{"href":"#publishedAt"}]},{"id":"doCreateCategory","type":"unsafe","rt":"#Category","title":"Create Category","tag":"category","descriptor":[{"href":"#slug"},{"href":"#name"},{"href":"#description"},{"href":"#parentId"}]},{"id":"doUpdateCategory","type":"idempotent","rt":"#Category","title":"Update Category","tag":"category","descriptor":[{"href":"#id"},{"href":"#name"},{"href":"#description"},{"href":"#parentId"}]},{"id":"doDeleteCategory","type":"idempotent","rt":"#CategoryList","title":"Delete Category","tag":"category","descriptor":[{"href":"#id"}]},{"id":"doCreateTag","type":"unsafe","rt":"#Tag","title":"Create Tag","tag":"tag","descriptor":[{"href":"#slug"},{"href":"#name"}]},{"id":"doDeleteTag","type":"idempotent","rt":"#TagList","title":"Delete Tag","tag":"tag","descriptor":[{"href":"#id"}]},{"id":"doCreateAuthor","type":"unsafe","rt":"#Author","title":"Create Author","tag":"author","descriptor":[{"href":"#name"},{"href":"#email"},{"href":"#bio"}]},{"id":"doUpdateAuthor","type":"idempotent","rt":"#Author","title":"Update Author","tag":"author","descriptor":[{"href":"#id"},{"href":"#name"},{"href":"#email"},{"href":"#bio"}]},{"id":"doCreateMedia","type":"unsafe","rt":"#Media","title":"Upload Media","tag":"media","descriptor":[{"href":"#filename"},{"href":"#mimeType"},{"href":"#url"},{"href":"#alt"},{"href":"#width"},{"href":"#height"}]},{"id":"doUploadMediaFile","type":"unsafe","rt":"#Media","title":"Upload Media File","tag":"media","descriptor":[{"href":"#file"},{"href":"#alt"}]},{"id":"doDeleteMedia","type":"idempotent","rt":"#Media","title":"Delete Media","tag":"media","descriptor":[{"href":"#id"}]}]}};
+window.alpsData = {"alps":{"title":"BEAR.Cms Reference CMS","doc":{"value":"ALPS profile for the BEAR.Cms App resource API. Covers articles, categories, tags, authors and media with read and write transitions."},"link":[{"rel":"apidoc","href":"index.html"},{"rel":"alps","href":"alps.html"},{"rel":"diagram","href":"alps.svg"},{"rel":"openapi","href":"openapi.json"},{"rel":"llms","href":"llms.txt"},{"rel":"terms","href":"terms.html"},{"rel":"terms-markdown","href":"terms.md"},{"rel":"audit","href":"audit.md"},{"rel":"schemas","href":"schemas/"}],"descriptor":[{"id":"id","title":"Identifier","def":"https://schema.org/identifier"},{"id":"slug","title":"URL-safe Slug","doc":{"value":"Lower-case kebab-case unique identifier used in human-readable URIs."}},{"id":"name","title":"Name","def":"https://schema.org/name"},{"id":"title","title":"Title","def":"https://schema.org/headline"},{"id":"body","title":"Article Body","def":"https://schema.org/articleBody"},{"id":"excerpt","title":"Excerpt","doc":{"value":"Short summary used in list views."}},{"id":"status","title":"Lifecycle Status","doc":{"value":"draft or published."}},{"id":"publishedAt","title":"Published At","def":"https://schema.org/datePublished"},{"id":"description","title":"Description","def":"https://schema.org/description"},{"id":"email","title":"Email","def":"https://schema.org/email"},{"id":"bio","title":"Biography","def":"https://schema.org/description"},{"id":"filename","title":"Filename"},{"id":"file","title":"Uploaded File","doc":{"value":"Binary file body resolved by Ray.InputQuery #[InputFile]."}},{"id":"mimeType","title":"MIME Type","def":"https://schema.org/encodingFormat"},{"id":"url","title":"URL","def":"https://schema.org/contentUrl"},{"id":"alt","title":"Alt Text","doc":{"value":"Accessibility text describing the media."}},{"id":"width","title":"Width","def":"https://schema.org/width"},{"id":"height","title":"Height","def":"https://schema.org/height"},{"id":"authorId","title":"Author ID (FK)"},{"id":"categoryId","title":"Category ID (FK)"},{"id":"parentId","title":"Parent Category ID (self-FK)","doc":{"value":"Nullable reference for hierarchical categories."}},{"id":"tagId","title":"Tag ID (filter)"},{"id":"articleId","title":"Article ID (filter)"},{"id":"page","title":"Page Number","doc":{"value":"1-indexed pagination page."}},{"id":"perPage","title":"Per-Page Count"},{"id":"totalCount","title":"Total Count"},{"id":"Article","title":"Article Detail","doc":{"value":"Single article with embedded Author, Category and Tags."},"descriptor":[{"href":"#id"},{"href":"#slug"},{"href":"#title"},{"href":"#body"},{"href":"#excerpt"},{"href":"#status"},{"href":"#publishedAt"},{"href":"#authorId"},{"href":"#categoryId"},{"href":"#Author"},{"href":"#Category"},{"href":"#Tag"},{"href":"#goArticleList"},{"href":"#goAuthor"},{"href":"#goCategory"},{"href":"#doUpdateArticle"},{"href":"#doDeleteArticle"},{"href":"#doPublishArticle"}],"tag":"article"},{"id":"ArticleList","title":"Article List","doc":{"value":"Paginated list of articles; supports filtering by category, tag, or status."},"descriptor":[{"href":"#id"},{"href":"#slug"},{"href":"#title"},{"href":"#excerpt"},{"href":"#status"},{"href":"#publishedAt"},{"href":"#page"},{"href":"#perPage"},{"href":"#totalCount"},{"href":"#goArticle"},{"href":"#doCreateArticle"}],"tag":"article flow-browse"},{"id":"Category","title":"Category Detail","descriptor":[{"href":"#id"},{"href":"#slug"},{"href":"#name"},{"href":"#description"},{"href":"#parentId"},{"href":"#goCategoryList"},{"href":"#goArticleList"},{"href":"#doUpdateCategory"},{"href":"#doDeleteCategory"}],"tag":"category"},{"id":"CategoryList","title":"Category List","descriptor":[{"href":"#id"},{"href":"#slug"},{"href":"#name"},{"href":"#parentId"},{"href":"#goCategory"},{"href":"#doCreateCategory"}],"tag":"category flow-browse"},{"id":"Tag","title":"Tag Detail","descriptor":[{"href":"#id"},{"href":"#slug"},{"href":"#name"},{"href":"#goTagList"},{"href":"#goArticleList"},{"href":"#doDeleteTag"}],"tag":"tag"},{"id":"TagList","title":"Tag List","descriptor":[{"href":"#id"},{"href":"#slug"},{"href":"#name"},{"href":"#goTag"},{"href":"#doCreateTag"}],"tag":"tag flow-browse"},{"id":"Author","title":"Author Detail","descriptor":[{"href":"#id"},{"href":"#name"},{"href":"#email"},{"href":"#bio"},{"href":"#goArticleList"},{"href":"#doUpdateAuthor"}],"tag":"author"},{"id":"AuthorList","title":"Author List","doc":{"value":"List of authors."},"descriptor":[{"href":"#id"},{"href":"#name"},{"href":"#email"},{"href":"#bio"},{"href":"#goAuthor"},{"href":"#doCreateAuthor"}],"tag":"author flow-browse"},{"id":"Media","title":"Media Detail","descriptor":[{"href":"#id"},{"href":"#filename"},{"href":"#mimeType"},{"href":"#url"},{"href":"#alt"},{"href":"#width"},{"href":"#height"},{"href":"#doUploadMediaFile"},{"href":"#doDeleteMedia"}],"tag":"media"},{"id":"goArticleList","type":"safe","rt":"#ArticleList","title":"View Article List","doc":{"value":"List published articles, filterable by category, tag or status."},"tag":"article flow-browse","descriptor":[{"href":"#page"},{"href":"#perPage"},{"href":"#categoryId"},{"href":"#tagId"},{"href":"#status"}]},{"id":"goArticle","type":"safe","rt":"#Article","title":"View Article","doc":{"value":"Retrieve a single article by id with embedded Author/Category/Tags."},"tag":"article","descriptor":[{"href":"#id"}]},{"id":"goCategoryList","type":"safe","rt":"#CategoryList","title":"View Category List","tag":"category flow-browse"},{"id":"goCategory","type":"safe","rt":"#Category","title":"View Category","tag":"category","descriptor":[{"href":"#id"}]},{"id":"goTagList","type":"safe","rt":"#TagList","title":"View Tag List","tag":"tag flow-browse"},{"id":"goTag","type":"safe","rt":"#Tag","title":"View Tag","tag":"tag","descriptor":[{"href":"#id"}]},{"id":"goAuthorList","type":"safe","rt":"#AuthorList","title":"View Author List","tag":"author flow-browse"},{"id":"goAuthor","type":"safe","rt":"#Author","title":"View Author","tag":"author","descriptor":[{"href":"#id"}]},{"id":"goMedia","type":"safe","rt":"#Media","title":"View Media","tag":"media","descriptor":[{"href":"#id"}]},{"id":"doCreateArticle","type":"unsafe","rt":"#Article","title":"Create Article","doc":{"value":"Create a new article. Returns the created article detail."},"tag":"article flow-publish","descriptor":[{"href":"#slug"},{"href":"#title"},{"href":"#body"},{"href":"#excerpt"},{"href":"#status"},{"href":"#authorId"},{"href":"#categoryId"}]},{"id":"doUpdateArticle","type":"idempotent","rt":"#Article","title":"Update Article","tag":"article flow-publish","descriptor":[{"href":"#id"},{"href":"#title"},{"href":"#body"},{"href":"#excerpt"},{"href":"#status"}]},{"id":"doDeleteArticle","type":"idempotent","rt":"#ArticleList","title":"Delete Article","tag":"article flow-publish","descriptor":[{"href":"#id"}]},{"id":"doPublishArticle","type":"unsafe","rt":"#Article","title":"Publish Article","doc":{"value":"Move a draft article to published. Non-idempotent: a second call on an already-published article returns 409 Conflict (the state machine guards against re-publishing)."},"tag":"article flow-publish","descriptor":[{"href":"#id"},{"href":"#publishedAt"}]},{"id":"doCreateCategory","type":"unsafe","rt":"#Category","title":"Create Category","tag":"category","descriptor":[{"href":"#slug"},{"href":"#name"},{"href":"#description"},{"href":"#parentId"}]},{"id":"doUpdateCategory","type":"idempotent","rt":"#Category","title":"Update Category","tag":"category","descriptor":[{"href":"#id"},{"href":"#name"},{"href":"#description"},{"href":"#parentId"}]},{"id":"doDeleteCategory","type":"idempotent","rt":"#CategoryList","title":"Delete Category","tag":"category","descriptor":[{"href":"#id"}]},{"id":"doCreateTag","type":"unsafe","rt":"#Tag","title":"Create Tag","tag":"tag","descriptor":[{"href":"#slug"},{"href":"#name"}]},{"id":"doDeleteTag","type":"idempotent","rt":"#TagList","title":"Delete Tag","tag":"tag","descriptor":[{"href":"#id"}]},{"id":"doCreateAuthor","type":"unsafe","rt":"#Author","title":"Create Author","tag":"author","descriptor":[{"href":"#name"},{"href":"#email"},{"href":"#bio"}]},{"id":"doUpdateAuthor","type":"idempotent","rt":"#Author","title":"Update Author","tag":"author","descriptor":[{"href":"#id"},{"href":"#name"},{"href":"#email"},{"href":"#bio"}]},{"id":"doCreateMedia","type":"unsafe","rt":"#Media","title":"Upload Media","tag":"media","descriptor":[{"href":"#filename"},{"href":"#mimeType"},{"href":"#url"},{"href":"#alt"},{"href":"#width"},{"href":"#height"}]},{"id":"doUploadMediaFile","type":"unsafe","rt":"#Media","title":"Upload Media File","tag":"media","descriptor":[{"href":"#file"},{"href":"#alt"}]},{"id":"doDeleteMedia","type":"idempotent","rt":"#Media","title":"Delete Media","tag":"media","descriptor":[{"href":"#id"}]}]}};
 
 function generateDotFromAlps(data, labelMode) {
     const descriptors = data.alps?.descriptor || [];
