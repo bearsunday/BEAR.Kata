@@ -115,3 +115,4 @@ Ontologyは `title`（def: schema.org/headline）などのfield語彙、Taxonomy
 - [`hal-link`](./hal-link.md) — Choreography遷移名を `_links` relとして付ける
 - [`hal-embed`](./hal-embed.md) — Taxonomy名詞を `_embedded` relとして埋め込む
 - [`hypermedia-workflow-test`](./hypermedia-workflow-test.md) — rel名を辿ってworkflowをテストする
+- [`alps-reference-integrity`](./alps-reference-integrity.md) — `#[Alps]` の参照がこのprofileからずれていないかをテストで検査する

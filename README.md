@@ -133,6 +133,7 @@ BEAR.Sunday アプリケーションの実装パターン集（Kata = 型）。�
 | やりたいこと | Kata | Status |
 |---|---|---|
 | ALPS profileを意味のSSOTにする | [`alps-profile-ssot`](kata/alps-profile-ssot.md) | support |
+| `#[Alps]` の参照がprofileからずれていないか検査する | [`alps-reference-integrity`](kata/alps-reference-integrity.md) | support |
 | 決定的なfake dataを生成する | [`semantic-fake-data`](kata/semantic-fake-data.md) | support |
 | 観測からJSON Schemaを生成する | [`json-schema-generated`](kata/json-schema-generated.md) | support |
 | API docsとllms.txtを生成する | [`apidoc-llms-generated`](kata/apidoc-llms-generated.md) | support |
