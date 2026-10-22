@@ -10,15 +10,21 @@
 
 ## 例
 
-### 走査 — `src/` から `#[Alps('id')]` を集める
+### 走査 — `src/` の `#[Alps('id')]` 属性を集める
 
-sourceを走査し、**idだけでなく宣言しているファイルのパスも**残す。正規表現はシングル/ダブルクォートと `id:` 付きの名前引数を受ける:
+**ファイルをテキストとして正規表現で舐めない。** コメントアウトした `#[Alps]` や、たまたま同じ文字列を含む literal まで参照として数えてしまい、allowlistの逆テストが「消えた参照」を見逃す。tokenizer で `T_ATTRIBUTE` から対応する `]` までを切り出し、その中だけを照合する。idだけでなく、宣言しているファイルのパスも残す:
 
 ```php
-preg_match_all(self::ALPS_REFERENCE, $contents, $matches, PREG_SET_ORDER);
-foreach ($matches as [, , $id]) {
-    $byId[$id][] = $path; // リポジトリルートからの相対パス
+// $attribute は T_ATTRIBUTE から対応する ] までを組み立てた文字列
+if (preg_match(self::ALPS_REFERENCE, $attribute, $matches) === 1) {
+    $byId[$matches[2]][] = $path; // リポジトリルートからの相対パス
 }
+```
+
+正規表現はシングル/ダブルクォートと `id:` 付きの名前引数を受ける:
+
+```php
+private const string ALPS_REFERENCE = '/\bAlps\(\s*(?:id\s*:\s*)?(["\'])([^"\']+)\1\s*\)/';
 ```
 
 ### 差集合 — profileに実在しないidを見つける
@@ -123,7 +129,7 @@ allowlistはprefixパターンマッチではなく列挙にする — 新しい
 
 ## Key points
 
-`#[Alps('id')]` はResourceが「このprofile descriptorを実装している」と主張するものだが、`asd --validate` はprofile自体の構文しか見ず、コードからの参照が実在するかは検査しない。この型はsrcを走査して集めたid集合とprofileのdescriptor id集合の差集合を取り、残りをallowlistと突き合わせる。allowlistには逆方向のテストを付け（直ったのに残っていたら落ちる）、idだけでなく宣言箇所も条件に入れ（本流のResourceが同じidを名乗ったら落ちる）、profileやsrc走査が壊れて両assertが空虚化しないよう最低件数のlower boundで守る。3段構えのどれか1つを削ると保証が崩れる。
+`#[Alps('id')]` はResourceが「このprofile descriptorを実装している」と主張するものだが、`asd --validate` はprofile自体の構文しか見ず、コードからの参照が実在するかは検査しない。この型はsrcを走査して集めたid集合とprofileのdescriptor id集合の差集合を取り、残りをallowlistと突き合わせる。走査は属性トークンだけを対象にし（コメントや文字列を参照と数えない）、allowlistには逆方向のテストを付け（直ったのに残っていたら落ちる）、idだけでなく宣言箇所も条件に入れ（本流のResourceが同じidを名乗ったら落ちる）、profileやsrc走査が壊れて両assertが空虚化しないよう最低件数のlower boundで守る。4段構えのどれか1つを削ると保証が崩れる。
 
 ## Do not
 

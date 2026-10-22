@@ -21,15 +21,16 @@ use function is_array;
 use function is_string;
 use function json_decode;
 use function ksort;
-use function preg_match_all;
+use function preg_match;
 use function realpath;
 use function sort;
 use function str_starts_with;
 use function strlen;
 use function substr;
+use function token_get_all;
 
 use const JSON_THROW_ON_ERROR;
-use const PREG_SET_ORDER;
+use const T_ATTRIBUTE;
 
 /**
  * `var/alps/profile.json` is the SSOT (see `kata/alps-profile-ssot.md`), and
@@ -54,7 +55,7 @@ final class AlpsReferenceIntegrityTest extends TestCase
 {
     private const string CACHE_SHOWCASE_DIR = 'src/Resource/App/Cache/';
 
-    private const string ALPS_REFERENCE = '/#\[Alps\(\s*(?:id\s*:\s*)?(["\'])([^"\']+)\1\s*\)\]/';
+    private const string ALPS_REFERENCE = '/\bAlps\(\s*(?:id\s*:\s*)?(["\'])([^"\']+)\1\s*\)/';
 
     /**
      * Every `#[Alps]` id declared under `src/Resource/App/Cache/`. Each is a
@@ -186,8 +187,7 @@ final class AlpsReferenceIntegrityTest extends TestCase
 
             $path = substr((string) realpath($file->getPathname()), strlen($root) + 1);
             $contents = (string) file_get_contents($file->getPathname());
-            preg_match_all(self::ALPS_REFERENCE, $contents, $matches, PREG_SET_ORDER);
-            foreach ($matches as [, , $id]) {
+            foreach ($this->attributeIds($contents) as $id) {
                 $byId[$id][] = $path;
             }
         }
@@ -210,6 +210,52 @@ final class AlpsReferenceIntegrityTest extends TestCase
         }
 
         return $files !== [];
+    }
+
+    /**
+     * Attribute text only: a commented-out `#[Alps]` is not a reference, and
+     * neither is a string literal that happens to spell one.
+     *
+     * @return list<string>
+     */
+    private function attributeIds(string $contents): array
+    {
+        $ids = [];
+        $attribute = '';
+        $depth = 0;
+        foreach (token_get_all($contents) as $token) {
+            $text = is_array($token) ? $token[1] : $token;
+            if ($attribute === '') {
+                if (is_array($token) && $token[0] === T_ATTRIBUTE) {
+                    $attribute = $text;
+                }
+
+                continue;
+            }
+
+            $attribute .= $text;
+            if ($text === '[') {
+                $depth++;
+                continue;
+            }
+
+            if ($text !== ']') {
+                continue;
+            }
+
+            if ($depth > 0) {
+                $depth--;
+                continue;
+            }
+
+            if (preg_match(self::ALPS_REFERENCE, $attribute, $matches) === 1) {
+                $ids[] = $matches[2];
+            }
+
+            $attribute = '';
+        }
+
+        return $ids;
     }
 
     /**
