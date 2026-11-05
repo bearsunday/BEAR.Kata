@@ -18,9 +18,14 @@ use SessionHandlerInterface;
 
 use function restore_error_handler;
 use function session_id;
+use function session_name;
 use function session_set_save_handler;
 use function session_start;
+use function session_status;
 use function set_error_handler;
+
+use const PHP_SESSION_ACTIVE;
+use const PHP_SESSION_NONE;
 
 /**
  * Runs in its own process: PHPUnit has already written to stdout in the main
@@ -57,6 +62,26 @@ final class NativeAuthSessionTest extends TestCase
                 $this->clears++;
             }
         });
+    }
+
+    /** @SuppressWarnings("PHPMD.Superglobals") The cookie is the input under test. */
+    #[RunInSeparateProcess]
+    #[PreserveGlobalState(false)]
+    public function testVisitorWithoutSessionCookieStartsNoSession(): void
+    {
+        $this->assertInstanceOf(Visitor::class, $this->session->currentUser());
+        $this->assertSame(PHP_SESSION_NONE, session_status());
+    }
+
+    /** @SuppressWarnings("PHPMD.Superglobals") The cookie is the input under test. */
+    #[RunInSeparateProcess]
+    #[PreserveGlobalState(false)]
+    public function testSessionCookieIsReadBeforeAnsweringVisitor(): void
+    {
+        $_COOKIE[session_name()] = 'carried-over-id';
+
+        $this->assertInstanceOf(Visitor::class, $this->session->currentUser());
+        $this->assertSame(PHP_SESSION_ACTIVE, session_status());
     }
 
     #[RunInSeparateProcess]

@@ -92,6 +92,10 @@ start 後の cookie 設定を警告だけで無視するので、`session.auto_s
 `session_start()` があると既定の cookie のまま全 request が成功してしまう。黙って成立しない形を
 例外にする。
 
+`currentUser()` は session cookie を持たない request では `session_start()` を呼ばず `Visitor` を返す。
+公開 Page を見るだけの訪問者に cookie と session file を配らず、`Set-Cookie` 付きの応答が
+shared cache に載らなくなる事態も避ける。session を開始するのは state 発行と cookie 持参時だけ。
+
 `SameSite` は `Lax` であって `Strict` ではない。OAuth callback は cross-site の top-level
 navigation で、login state を持つ cookie をそこで受け取る必要がある。
 
@@ -195,7 +199,7 @@ application が所有する部分のみ。library は [`bear/csrf`](https://gith
 - [`tests/Interceptor/SameOriginWiringTest.php`](../tests/Interceptor/SameOriginWiringTest.php)
 - [`tests/Interceptor/PageCsrfAttributeCoverageTest.php`](../tests/Interceptor/PageCsrfAttributeCoverageTest.php) — 付け忘れ検出
 - [`tests/Interceptor/ProdCsrfBootTest.php`](../tests/Interceptor/ProdCsrfBootTest.php) — origin 未設定で prod が boot に失敗する
-- [`tests/Service/NativeAuthSessionTest.php`](../tests/Service/NativeAuthSessionTest.php) — login / logout で session id が変わり `clear()` が呼ばれる。回せなければ login が中断する
+- [`tests/Service/NativeAuthSessionTest.php`](../tests/Service/NativeAuthSessionTest.php) — login / logout で session id が変わり `clear()` が呼ばれる。回せなければ login が中断する。cookie の無い request では session を開始しない
 - [`tests/Service/SessionCookieTest.php`](../tests/Service/SessionCookieTest.php) — cookie 属性が session 開始前に決まる。開始後なら拒否する
 - [`tests/Service/RequestSchemeTest.php`](../tests/Service/RequestSchemeTest.php) — public origin と `$_SERVER['HTTPS']` からの `Secure` 判定
 - [`tests/Renderer/CmsHelpersTest.php`](../tests/Renderer/CmsHelpersTest.php) — helper が bound field 名で描画する。POST form はすべて helper 経由で、手書きの input がない
@@ -220,7 +224,7 @@ reflection で検出する — library には見えない穴で、ここが appl
 - 設定値の欠落で防御が静かに外れる形にしない — 「検証しない」は `withoutSameOriginCheck()` という**書かなければ起きない**選択として表す。ただし module API がそう書けても composition root が env から導出するなら欠落は防げない。落とすのは `ProdModule` の役割。
 - attribute の付け忘れを library に期待しない — 付いていない method は interceptor の視界に入らない。網羅は application の test で保証する。
 - session cookie を PHP 既定のまま使わない — 既定は `SameSite` 無指定・`HttpOnly` off。`session_start()` を呼ぶ側 (`NativeAuthSession`、`SessionCsrfStore`) は属性を決めず、`Bootstrap` が最初の start より前に決める。
-- 公開 Page を cache するなら token も user も eager に埋めない — renderer は全 template に `issue()` と `currentUser()` の結果を渡す。`#[CacheableResponse]` な公開 Page と同居すると、最初の訪問者の token が cache された HTML で配られる。この kata の form は admin のみで cache しない。公開 form と cache を同居させる consumer は template 側の遅延発行にする。
+- 公開 Page を cache するなら token を eager に埋めない — token は `csrfField()` が form の中で呼ばれたときだけ `issue()` される。renderer が全 template に渡すのは `currentUser()` だけで、cookie の無い訪問者には session も開始しない。`#[CacheableResponse]` な公開 Page に form を置けば、最初の訪問者の token が cache された HTML で配られる。この kata の form は admin のみで cache しない。
 - **coroutine hostにそのまま持ち込まない** — 同梱の `SessionCsrfStore` は `$_SESSION` 依存で、Swooleのようにworker内で複数requestが並行する環境ではtokenがworker単位で共有され防御が成立しない([BEAR.Csrf#7](https://github.com/bearsunday/BEAR.Csrf/issues/7)、未解決)。並行hostでは `CsrfTokenInterface` をrequest scopeのstoreに束縛し直す。
 
 ## マスター確認（After）
@@ -229,7 +233,8 @@ reflection で検出する — library には見えない穴で、ここが appl
 - [ ] login / logout で session id が変わり `clear()` が呼ばれることを `NativeAuthSessionTest` で green。cookie は `HttpOnly` / `SameSite=Lax`、public origin が https なら `Secure`。
 - [ ] wiring test が injector 経由で interception の成立を示している。
 - [ ] prod context で `CMS_ALLOWED_ORIGIN` 未設定なら boot に失敗する。
-- [ ] renderer が全 template に token と field 名を供給し、logout で `clear()` される。
+- [ ] POST form はすべて `csrfField()` helper 経由で描画され（`CmsHelpersTest`）、logout で `clear()` される。
+- [ ] session cookie の無い request で `currentUser()` が session を開始しない（`NativeAuthSessionTest`）。
 
 green が意味するのは「この構成で組み込み側の義務が満たされている」ことであって、
 CSRF 防御そのものの証明ではない。後者は `bear/csrf` の test が持つ。

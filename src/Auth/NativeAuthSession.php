@@ -13,6 +13,7 @@ use function is_array;
 use function is_int;
 use function is_string;
 use function random_bytes;
+use function session_name;
 use function session_regenerate_id;
 use function session_start;
 use function session_status;
@@ -31,6 +32,10 @@ final class NativeAuthSession implements AuthSessionInterface
 
     public function currentUser(): UserInterface
     {
+        if (! $this->hasSession()) {
+            return new Visitor();
+        }
+
         $this->start();
         $user = $_SESSION[self::USER] ?? null;
         if (! is_array($user)) {
@@ -84,6 +89,16 @@ final class NativeAuthSession implements AuthSessionInterface
         $this->start();
         unset($_SESSION[self::USER], $_SESSION[self::STATE]);
         $this->rotate();
+    }
+
+    /**
+     * A request without a session cookie has no session to read. Starting one
+     * anyway would hand every anonymous visitor a cookie and a session file, and
+     * a Set-Cookie on a public page keeps shared caches from storing it.
+     */
+    private function hasSession(): bool
+    {
+        return session_status() === PHP_SESSION_ACTIVE || isset($_COOKIE[session_name()]);
     }
 
     private function start(): void
