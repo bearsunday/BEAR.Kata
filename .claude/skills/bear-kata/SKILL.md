@@ -1,6 +1,6 @@
 ---
 name: bear-kata
-description: BEAR.Sunday実装の「型(Kata)」をソース索引から引く。「BEAR.Sundayで〜を実装したい」時に、どの正規形(canonical)ソースを真似し、どのテストで振る舞いを確認し、実装後にどうマスターを検証するかを案内する。Use when user says "〜をkataに従って実装してください", "kataに従って実装", "kata に従って", "BEAR.Sundayで〜を実装したい", "Kata", "ソース索引", "source index", "どのソースを見れば", "pager/HAL embed/streaming/PRG/Cacheable/CSRF/OAuth/ファイルアップロード/イベントソーシング/defer/conditional request/content negotiation/PATCH/OPTIONS/form validation/FakeSqlQuery を実装", or asks which BEAR.Sunday reference implementation to copy/follow for a feature.
+description: BEAR.Sunday実装の「型(Kata)」をソース索引から引く。「BEAR.Sundayで〜を実装したい」時に、どの正規形(canonical)ソースを真似し、どのテストで振る舞いを確認し、実装後にどうマスターを検証するかを案内する。Use when user says "〜をkataに従って実装してください", "kataに従って実装", "kata に従って", "BEAR.Sundayで〜を実装したい", "Kata", "ソース索引", "source index", "どのソースを見れば", "pager/HAL embed/streaming/PRG/Cacheable/CSRF/session cookie/OAuth/ファイルアップロード/イベントソーシング/defer/conditional request/content negotiation/PATCH/OPTIONS/form validation/FakeSqlQuery を実装", or asks which BEAR.Sunday reference implementation to copy/follow for a feature.
 user-invocable: true
 ---
 
@@ -46,12 +46,12 @@ user-invocable: true
 
 この索引がカバーするBEAR.Sunday機能とカバーしない機能:
 
-**カバー済み（実装あり 57 Kata）:**
+**カバー済み（実装あり 58 Kata）:**
 - Resource: GET/POST/PUT/DELETE, not-found, JSON Schema, HAL link/embed, crawl/DataLoader, state transition, error mapping
 - DB: BDR read/write, entity factory（`#[DbQuery(factory:)]`）, pager, natural key, link table, result projection
 - Cache: `#[Cacheable]`, `#[DonutCache]`, `#[CacheableResponse]`, `#[Purge]`, embed dependency, `fromAssoc`, 条件付きリクエスト/304
 - HTML: Page/Qiq detail/list, Markdown, PRG, 確認画面, session OAuth login, admin auth boundary
-- Runtime: stream, async/parallel, CLI, CSRF/Same-Origin, import-app
+- Runtime: stream, async/parallel, CLI, CSRF/Same-Origin, session cookie hardening, import-app
 - Event Sourcing: extraction, filter/replay, store, observation bridge
 - Deferred: `#[Defer]`, conditional defer
 - Tests: resource/page/hypermedia/fake/MySQL

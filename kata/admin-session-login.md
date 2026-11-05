@@ -116,6 +116,31 @@ public function consumeState(string $state): bool
 }
 ```
 
+### login / logout（session の確立と破棄）
+
+認証状態が変わる 2 箇所は順序が型 — `login()` は session id を回してから user を書き、`logout()` は user を外してから回す。回転と CSRF token の `clear()` は [`session-cookie-hardening`](./session-cookie-hardening.md):
+
+```php
+public function login(AuthenticatedUser $user, int $authorId): void
+{
+    $this->start();
+    $this->rotate();
+    $_SESSION[self::USER] = [
+        'id' => $user->id,
+        'email' => $user->email,
+        'name' => $user->name,
+        'authorId' => $authorId,
+    ];
+}
+
+public function logout(): void
+{
+    $this->start();
+    unset($_SESSION[self::USER], $_SESSION[self::STATE]);
+    $this->rotate();
+}
+```
+
 ### Identity mapping
 
 恒久キーは `(provider, subject)`。未マッピング時のみemailでauthorを引き、mappingを1回だけ `add` する。unique制約違反（並行ログイン）は既存mappingを読み直して吸収する:
@@ -170,7 +195,7 @@ login / callback / logout は別Page Resourceに分け、URLと1対1にする（
 - [ ] CSRF/replay対策として `issueState()` → `consumeState()`（one-time消費 + `hash_equals` 比較）のstate検証を入れると決めたか。
 - [ ] 外部identityを `(provider, subject) → authorId` でマッピングし、emailは初回ログインのfallbackのみと理解したか。
 - [ ] logoutはGETでなくPOST（`#[SameOrigin]` + `#[CsrfToken]`）にすると決めたか。
-- [ ] login / logout で `session_regenerate_id(true)` と CSRF token の `clear()` を行う（session fixation 対策）と理解したか。
+- [ ] `login()` は session id を回してから user を書き、`logout()` は user を外してから回す（回転の中身は [`session-cookie-hardening`](./session-cookie-hardening.md)）と理解したか。
 
 ## Source
 
@@ -204,6 +229,7 @@ Loginは `issueState()` → 302（authorization URL）。Callbackはstate検証�
 - [`admin-auth-boundary`](./admin-auth-boundary.md) — 確立したsessionを型付きユーザー境界で検査する側
 - [`auth-oauth-flow`](./auth-oauth-flow.md) — OAuth認証フローをResourceで示す（App側）
 - [`csrf-same-origin-protection`](./csrf-same-origin-protection.md) — logout POSTを守る `#[SameOrigin]` + `#[CsrfToken]` のbind
+- [`session-cookie-hardening`](./session-cookie-hardening.md) — この flow が確立する session の cookie 属性と、`login()` / `logout()` の回転
 - [`admin-prg-form`](./admin-prg-form.md) — POST → 303 リダイレクトのPRG（admin form側）
 - [`db-read-by-natural-key`](./db-read-by-natural-key.md) — `byProviderSubject` / `byEmail` の自然キー読み
 - [`page-resource-test`](./page-resource-test.md) — Page Resourceのテストの型（`LoginTest` の土台）
