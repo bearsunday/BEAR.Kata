@@ -108,8 +108,10 @@ private function rotate(): void
 ### cookie を持たない訪問者には session を開始しない
 
 renderer は全 Page で `currentUser()` を呼ぶ。そこで無条件に `session_start()` すると、
-公開 Page を見るだけの訪問者全員に cookie と session file が配られ、`Set-Cookie` 付きの応答は
-shared cache に載らない。読むものが無い request には開始せず `Visitor` を返す:
+公開 Page を見るだけの訪問者全員に cookie と session file が配られる。PHP 既定の
+`session.cache_limiter=nocache` はそのとき `Cache-Control: no-store` も送るので、公開 Page が
+cache 不能になる — ただしこれは設定で変わり、`Set-Cookie` 自体は shared cache への保存を
+防がない。読むものが無い request には開始せず `Visitor` を返す:
 
 ```php
 public function currentUser(): UserInterface
@@ -129,6 +131,9 @@ private function hasSession(): bool
 ```
 
 session を開始するのは state 発行（login の入口）と、cookie を持参した request だけ。
+shared cache を置くなら、それとは別に session cookie 付き request の cache 読み書きを bypass し、
+個人向け応答には `private` か `no-store` を付ける。cookie 無しで session を開始しないのは
+その前提を整える側で、cache 制御の代わりではない。
 
 ## Naming
 
@@ -179,7 +184,8 @@ cookie を持たない request には session を開始しない。
 - `session_start()` の後に cookie 属性を設定しない — 警告だけで無視され、全 request が成功し続ける。だから `SessionAlreadyActiveException`。
 - request header で `Secure` を決めない — `X-Forwarded-Proto` は誰でも付けられる。TLS 終端の事実は設定（public origin）として持つ。
 - 回転に失敗したまま user を書かない — 旧 id に認証を載せるのは fixation そのもの。`login()` は中断する。
-- 公開 Page の描画で session を開始しない — `Set-Cookie` が付いた応答は shared cache に載らず、訪問者ごとに session file が増える。
+- cookie を持たない訪問者の公開 Page 描画で session を開始しない — 不要な cookie と session file が増え、PHP 既定では応答が `no-store` になる。
+- `Set-Cookie` や PHP 既定の `no-store` を cache 制御の代わりにしない — shared cache を使うなら session cookie 付き request の bypass と、個人向け応答の `private` / `no-store` を明示する。
 
 ## マスター確認（After）
 

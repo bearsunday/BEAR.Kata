@@ -94,7 +94,7 @@ final class NativeAuthSession implements AuthSessionInterface
     /**
      * A request without a session cookie has no session to read. Starting one
      * anyway would hand every anonymous visitor a cookie and a session file, and
-     * a Set-Cookie on a public page keeps shared caches from storing it.
+     * PHP's default cache limiter would mark every public page no-store.
      */
     private function hasSession(): bool
     {

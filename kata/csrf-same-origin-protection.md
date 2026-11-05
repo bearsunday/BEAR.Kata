@@ -85,9 +85,15 @@ field 名を template に直書きしないのは、wire 名を変えたとき�
 
 ```php
 // NativeAuthSession::rotate() — login() と logout() の両方から
-session_regenerate_id(true);
+if (! session_regenerate_id(true)) {
+    throw new SessionRotationException();   // 旧 id のまま先へ進まない
+}
+
 $this->csrf->clear();   // 次の issue() が新 session に束縛された token を発行する
 ```
+
+回せなかったら `clear()` にも `login()` の user 書き込みにも進まない。失敗チェックを省いた
+写経は、旧 session id と旧 token の上に認証を載せる。
 
 login 前に発行された token を認証後まで持ち越すと、漏れた token がそのまま admin 権限の
 form を通す。token の寿命は session の寿命ではなく、認証状態の寿命に合わせる。
@@ -186,7 +192,7 @@ reflection で検出する — library には見えない穴で、ここが appl
 - App resource に門を付けない — CLI・seed・内部requestから到達するので、攻撃ではなく正当な呼び出しを塞ぐ。browser 境界は Page。
 - 設定値の欠落で防御が静かに外れる形にしない — 「検証しない」は `withoutSameOriginCheck()` という**書かなければ起きない**選択として表す。ただし module API がそう書けても composition root が env から導出するなら欠落は防げない。落とすのは `ProdModule` の役割。
 - attribute の付け忘れを library に期待しない — 付いていない method は interceptor の視界に入らない。網羅は application の test で保証する。
-- 公開 Page を cache するなら token を eager に埋めない — token は `csrfField()` が form の中で呼ばれたときだけ `issue()` される。`#[CacheableResponse]` な公開 Page に form を置けば、最初の訪問者の token が cache された HTML で配られる。この kata の form は admin のみで cache しない。
+- 個人向けに描画した HTML を shared cache に載せない — token は `csrfField()` が form の中で呼ばれたときだけ `issue()` されるが、layout は admin に logout form を公開 Page でも描く。公開 Page を `#[CacheableResponse]` にするなら、session cookie 付き request は cache を bypass し、個人向け応答には `private` か `no-store` を付ける。さもないと admin の token 入り HTML が次の訪問者に配られる。
 - 認証状態が変わった session に古い token を残さない — 回転は [`session-cookie-hardening`](./session-cookie-hardening.md) の責任だが、`clear()` を同じ場所で呼ぶのはこの kata の責任。
 - **coroutine hostにそのまま持ち込まない** — 同梱の `SessionCsrfStore` は `$_SESSION` 依存で、Swooleのようにworker内で複数requestが並行する環境ではtokenがworker単位で共有され防御が成立しない([BEAR.Csrf#7](https://github.com/bearsunday/BEAR.Csrf/issues/7)、未解決)。並行hostでは `CsrfTokenInterface` をrequest scopeのstoreに束縛し直す。
 
