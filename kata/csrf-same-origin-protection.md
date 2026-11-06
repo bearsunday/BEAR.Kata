@@ -79,13 +79,13 @@ field 名を template に直書きしないのは、wire 名を変えたとき�
 ### token は session に住む
 
 `SessionCsrfStore` は `$_SESSION` に token を置く。その session の cookie 属性
-(`HttpOnly` / `SameSite` / `Secure`) と、login / logout での session id の回転は
+(`HttpOnly` / `SameSite` / `Secure`)、login での回転、logout での破棄は
 [`session-cookie-hardening`](./session-cookie-hardening.md) の型で、この kata は扱わない。
-ここで守るのは一点だけ — 回転のたびに token も捨てる:
+ここで守るのは一点だけ — session が入れ替わるたびに token も捨てる:
 
 ```php
-// NativeAuthSession::rotate()
-// login() は rotate() してから user を書く。logout() は user を外してから rotate() する。
+// NativeAuthSession::rotate() — login() はこれを済ませてから user を書く。
+// logout() は token を clear() してから session ごと destroy() する。
 if (! session_regenerate_id(true)) {
     throw new SessionRotationException();   // 旧 id のまま先へ進まない
 }
@@ -152,7 +152,7 @@ attribute → interceptor → module の対応が名前で追える:
 - [ ] 門を掛けるのは browser が触る Page/Admin であって、CLI や内部requestから到達する App resource ではないと理解したか。
 - [ ] token 門と same-origin 門は独立で、後者は `withSameOriginCheck()` / `withoutSameOriginCheck()` のどちらを呼ぶかで決まると理解したか。prod での欠落は `ProdModule` が boot時に落とす。
 - [ ] attribute の付け忘れは library が検出できない consumer 側の穴で、application が test で塞ぐと理解したか。
-- [ ] token は session に住むので、login / logout で session id を回すときに token も `clear()` すると理解したか。cookie 属性と回転そのものは [`session-cookie-hardening`](./session-cookie-hardening.md)。
+- [ ] token は session に住むので、login の回転と logout の破棄で token も `clear()` すると理解したか。cookie 属性・回転・破棄そのものは [`session-cookie-hardening`](./session-cookie-hardening.md)。
 - [ ] 同梱 store が前提とする host (request が process を所有する) を確認したか。
 
 ## Source
@@ -164,7 +164,7 @@ application が所有する部分のみ。library は [`bear/csrf`](https://gith
 - [`src/Exception/MissingAllowedOriginException.php`](../src/Exception/MissingAllowedOriginException.php)
 - [`src/Renderer/CmsHelpers.php`](../src/Renderer/CmsHelpers.php) / [`src/Module/HtmlModule.php`](../src/Module/HtmlModule.php) — `csrfField()` helper と、QiqModule の `Helpers` をそれに置き換える binding
 - [`src/Resource/Page/Admin/Article.php`](../src/Resource/Page/Admin/Article.php) — attribute の置き場
-- [`src/Auth/NativeAuthSession.php`](../src/Auth/NativeAuthSession.php) — 回転に同期した token の `clear()`
+- [`src/Auth/NativeAuthSession.php`](../src/Auth/NativeAuthSession.php) — 回転と破棄に同期した token の `clear()`
 
 ## Tests
 
@@ -172,7 +172,7 @@ application が所有する部分のみ。library は [`bear/csrf`](https://gith
 - [`tests/Interceptor/SameOriginWiringTest.php`](../tests/Interceptor/SameOriginWiringTest.php)
 - [`tests/Interceptor/PageCsrfAttributeCoverageTest.php`](../tests/Interceptor/PageCsrfAttributeCoverageTest.php) — 付け忘れ検出
 - [`tests/Interceptor/ProdCsrfBootTest.php`](../tests/Interceptor/ProdCsrfBootTest.php) — origin 未設定で prod が boot に失敗する
-- [`tests/Service/NativeAuthSessionTest.php`](../tests/Service/NativeAuthSessionTest.php) — login / logout の回転で `clear()` が呼ばれる
+- [`tests/Service/NativeAuthSessionTest.php`](../tests/Service/NativeAuthSessionTest.php) — login の回転と logout の破棄で `clear()` が呼ばれる
 - [`tests/Renderer/CmsHelpersTest.php`](../tests/Renderer/CmsHelpersTest.php) — helper が bound field 名で描画する。POST form はすべて helper 経由で、手書きの input がない
 
 interceptor 単体の挙動 (signal 優先順位、malformed origin、token 比較) は library 側の
@@ -183,7 +183,7 @@ test が持つ。ここで再実装すると、同じ契約の記述が二つに
 門の位置と網羅が application の責任、仕組みは library の責任。`#[CsrfToken]` / `#[SameOrigin]`
 は browser が触る Page/Admin の unsafe verb にのみ付け、method 引数には token を取らない。
 hidden field は template helper `csrfField()` が `CsrfHiddenInput` から描画し、
-login / logout の session 回転に合わせて `CsrfTokenInterface::clear()` する（回転と cookie 属性は
+login の回転と logout の破棄に合わせて `CsrfTokenInterface::clear()` する（回転・破棄・cookie 属性は
 [`session-cookie-hardening`](./session-cookie-hardening.md)）。`PageCsrfAttributeCoverageTest` が付け忘れを
 reflection で検出する — library には見えない穴で、ここが application 側で最も効く一手。
 
@@ -194,13 +194,13 @@ reflection で検出する — library には見えない穴で、ここが appl
 - 設定値の欠落で防御が静かに外れる形にしない — 「検証しない」は `withoutSameOriginCheck()` という**書かなければ起きない**選択として表す。ただし module API がそう書けても composition root が env から導出するなら欠落は防げない。落とすのは `ProdModule` の役割。
 - attribute の付け忘れを library に期待しない — 付いていない method は interceptor の視界に入らない。網羅は application の test で保証する。
 - 個人向けに描画した HTML を cache に載せない — token は `csrfField()` が form の中で呼ばれたときだけ `issue()` されるが、layout は admin に logout form を公開 Page でも描くので、この layout を使う Page の描画はすべて user に依存する。`#[CacheableResponse]` は URI を key に描画済み view を保存する application cache で、HTTP の `private` / `no-store` や proxy の bypass では止まらない — 付ければ admin の token 入り HTML が次の訪問者に、匿名の view が admin に配られる。user 依存の描画を持つ Page には付けない。付けるなら session を持つ request を cache の読み書きから外す。shared HTTP cache はそれとは別の層で、session cookie 付き request の bypass と `private` / `no-store` で守る。
-- 認証状態が変わった session に古い token を残さない — 回転は [`session-cookie-hardening`](./session-cookie-hardening.md) の責任だが、`clear()` を同じ場所で呼ぶのはこの kata の責任。
+- 認証状態が変わった session に古い token を残さない — 回転と破棄は [`session-cookie-hardening`](./session-cookie-hardening.md) の責任だが、`clear()` を同じ場所で呼ぶのはこの kata の責任。
 - **coroutine hostにそのまま持ち込まない** — 同梱の `SessionCsrfStore` は `$_SESSION` 依存で、Swooleのようにworker内で複数requestが並行する環境ではtokenがworker単位で共有され防御が成立しない([BEAR.Csrf#7](https://github.com/bearsunday/BEAR.Csrf/issues/7)、未解決)。並行hostでは `CsrfTokenInterface` をrequest scopeのstoreに束縛し直す。
 
 ## マスター確認（After）
 
 - [ ] 全 Page write method に attribute が付いていることを coverage test で green。属性を1つ外すと落ちることを確認した。
-- [ ] login / logout の回転で `clear()` が呼ばれることを `NativeAuthSessionTest` で green。
+- [ ] login の回転と logout の破棄で `clear()` が呼ばれることを `NativeAuthSessionTest` で green。
 - [ ] wiring test が injector 経由で interception の成立を示している。
 - [ ] prod context で `CMS_ALLOWED_ORIGIN` 未設定なら boot に失敗する。
 - [ ] POST form はすべて `csrfField()` helper 経由で描画される（`CmsHelpersTest`）。
@@ -213,7 +213,7 @@ CSRF 防御そのものの証明ではない。後者は `bear/csrf` の test �
 - [`admin-prg-form`](./admin-prg-form.md) — この2 attributeが守るAdmin form POST（PRG）
 - [`admin-confirm-page`](./admin-confirm-page.md) — 確認画面のPOSTも同じ2 attributeで保護する
 - [`admin-auth-boundary`](./admin-auth-boundary.md) — 同じAdmin Pageを守るもう一つの境界（認証401 / 認可403）
-- [`session-cookie-hardening`](./session-cookie-hardening.md) — token が住む session の cookie 属性と、login / logout での回転
+- [`session-cookie-hardening`](./session-cookie-hardening.md) — token が住む session の cookie 属性、login での回転、logout での破棄
 - [`admin-session-login`](./admin-session-login.md) — tokenを保持するsessionの確立とlogout
 - [`aop-validation-valid`](./aop-validation-valid.md) — attribute + interceptorでmethodにgateを掛ける同型（validation）
 - [`rate-limit-interceptor`](./rate-limit-interceptor.md) — attribute + interceptorでmethodにgateを掛ける同型（rate limit）

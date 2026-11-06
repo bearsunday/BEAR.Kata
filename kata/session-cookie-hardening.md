@@ -1,12 +1,12 @@
 # `session-cookie-hardening`
 
-**session cookie の属性と回転を application が決める** · [← 索引に戻る](../index.md)
+**session cookie の属性・回転・破棄を application が決める** · [← 索引に戻る](../index.md)
 
 - **Category:** Runtime / representation
 - **Status:** `canonical`
 - **Aliases:** session cookie, SessionCookie, session_set_cookie_params, HttpOnly, SameSite, Secure, use_strict_mode, use_only_cookies, session fixation, session_regenerate_id, RequestScheme, TLS termination, reverse proxy, cookieSecure, lazy session start, session_start, cache_limiter, no-store, セッションクッキー, セッション固定化, セッション再生成, Secure属性, 匿名訪問者, セッション開始
 - **Manual:** https://bearsunday.github.io/manuals/1.0/en/security.html
-- **Use when:** PHP session を使う Page application で、cookie 属性（`HttpOnly` / `SameSite` / `Secure`）を application が決め、ログイン・ログアウトで session id を回したい。
+- **Use when:** PHP session を使う Page application で、cookie 属性（`HttpOnly` / `SameSite` / `Secure`）を application が決め、ログインで session id を回し、ログアウトで session と cookie を残さず捨てたい。
 
 ## 例
 
@@ -76,7 +76,7 @@ same-origin 門に渡す `CMS_ALLOWED_ORIGIN` が既にその事実を持って�
 決める。外部 SDK が自前の cookie を持つなら、そこにも同じ判定を渡す — Auth0 SDK の
 `auth0_session*` / `auth0_transient*` は `Auth0Provider` が同じ `RequestScheme` で `cookieSecure` を決める。
 
-### 認証状態が変わったら session id と token を回す
+### login は回し、logout は捨てる
 
 login 前に発行された session id と CSRF token を認証後まで持ち越さない。固定化された
 session や漏れた token が、そのまま admin 権限を得る経路になる:
@@ -90,13 +90,6 @@ public function login(AuthenticatedUser $user, int $authorId): void
     $_SESSION[self::USER] = [/* ... */];
 }
 
-public function logout(): void
-{
-    $this->start();
-    unset($_SESSION[self::USER], $_SESSION[self::STATE]);   // 先に外す
-    $this->rotate();
-}
-
 private function rotate(): void
 {
     if (! session_regenerate_id(true)) {
@@ -107,9 +100,37 @@ private function rotate(): void
 }
 ```
 
-順序が型。`login()` は回してから user を書き、回せなければ user を書かずに中断する —
-旧 id のまま認証を載せるのは、回転が防ぐはずの fixation そのもの。`logout()` は先に user を
-外してから回すので、回せなくても user は残らない。
+順序が型。`login()` は回してから user を書き、回せなかったら user を書かずに中断する —
+旧 id のまま認証を載せるのは、回転が防ぐはずの fixation そのもの。
+
+logout は回転ではなく破棄。空の新 session へ回すと browser に新しい id が残り、以後の公開 Page
+で毎回 session が開始される — 下の「cookie を持たない訪問者」の前提が、一度 sign out した
+訪問者に対して崩れる。user を外し、token を捨て、cookie を失効させ、session を破棄する:
+
+```php
+public function logout(): void
+{
+    $this->start();
+    unset($_SESSION[self::USER], $_SESSION[self::STATE]);   // 先に外す
+    $this->csrf->clear();
+    $this->destroy();
+}
+
+private function destroy(): void
+{
+    $name = session_name();
+    $params = session_get_cookie_params();
+    setcookie($name, '', ['expires' => time() - 3600] + $params);   // browser 側を先に失効
+    unset($_COOKIE[$name]);          // この request の残りが session を再開しない
+    $_SESSION = [];
+    if (! session_destroy()) {
+        throw new SessionDestroyException();
+    }
+}
+```
+
+cookie を先に失効させるので、`session_destroy()` が失敗しても browser は id を再開できない。
+失ったのは server 側の掃除だけで、それを完了した logout として扱わずに例外で報告する。
 
 ### cookie を持たない訪問者には session を開始しない
 
@@ -117,7 +138,8 @@ renderer は全 Page で `currentUser()` を呼ぶ。そこで無条件に `sess
 公開 Page を見るだけの訪問者全員に cookie と session file が配られる。PHP 既定の
 `session.cache_limiter=nocache` はそのとき `Cache-Control: no-store` も送るので、公開 Page が
 cache 不能になる — ただしこれは設定で変わり、`Set-Cookie` 自体は shared cache への保存を
-防がない。読むものが無い request には開始せず `Visitor` を返す:
+防がない。読むものが無い request には開始せず `Visitor` を返す。logout が cookie を失効させる
+ので、sign out した訪問者も次の request からはここに戻る:
 
 ```php
 public function currentUser(): UserInterface
@@ -152,8 +174,9 @@ session を開始しないのはその前提を整える側で、どちらの ca
 |---|---|---|
 | cookie 方針 | `SessionCookie::configure()` | `Bootstrap` が最初の start より前に呼ぶ |
 | scheme 判定 | `RequestScheme::isHttps()` | session cookie と外部 SDK の cookie が共有 |
-| 回転 | session adapter の private `rotate()` | `login()` / `logout()` の両方から |
-| fail-closed 例外 | `Session<Failure>Exception` | `SessionAlreadyActiveException`, `SessionRotationException` |
+| 回転 | session adapter の private `rotate()` | `login()` から。回してから user を書く |
+| 破棄 | session adapter の private `destroy()` | `logout()` から。cookie 失効 → `session_destroy()` |
+| fail-closed 例外 | `Session<Failure>Exception` | `SessionAlreadyActiveException`, `SessionRotationException`, `SessionDestroyException` |
 
 > 命名規則の全容は [conventions.md](../docs/conventions.md#3-naming) を参照。
 
@@ -162,7 +185,8 @@ session を開始しないのはその前提を整える側で、どちらの ca
 - [ ] `session_start()` を呼ぶ側（session adapter、CSRF store、library）は cookie 属性を決めず、Bootstrap が最初の start より前に一度だけ決めると理解したか。
 - [ ] `Secure` を `$_SERVER['HTTPS']` だけで決めない — TLS を終端する proxy の背後では public origin の scheme を正にすると決めたか。
 - [ ] `SameSite` は OAuth callback（cross-site top-level navigation）を通す `Lax` にすると決めたか。
-- [ ] `login()` は回してから user を書き、回せなければ中断。`logout()` は user を外してから回す — この順序を理解したか。
+- [ ] `login()` は回してから user を書き、回せなければ中断する — この順序を理解したか。
+- [ ] `logout()` は回転ではなく破棄 — user を外し、token を捨て、cookie を失効させ、`session_destroy()` する。残った cookie は以後の公開 Page で毎回 session を開始させる、と理解したか。
 - [ ] cookie を持たない request には session を開始しない（`Visitor` を返す）と決めたか。
 
 ## Source
@@ -170,15 +194,15 @@ session を開始しないのはその前提を整える側で、どちらの ca
 - [`src/Bootstrap.php`](../src/Bootstrap.php) — 呼び出し位置（Injector より前）
 - [`src/Auth/SessionCookie.php`](../src/Auth/SessionCookie.php) — 属性と fail-closed
 - [`src/Auth/RequestScheme.php`](../src/Auth/RequestScheme.php) — `Secure` の判定
-- [`src/Auth/NativeAuthSession.php`](../src/Auth/NativeAuthSession.php) — `rotate()` と `hasSession()`
+- [`src/Auth/NativeAuthSession.php`](../src/Auth/NativeAuthSession.php) — `rotate()` / `destroy()` / `hasSession()`
 - [`src/Provider/Auth0Provider.php`](../src/Provider/Auth0Provider.php) — 外部 SDK の cookie に同じ判定を渡す
-- [`src/Exception/SessionAlreadyActiveException.php`](../src/Exception/SessionAlreadyActiveException.php) / [`src/Exception/SessionRotationException.php`](../src/Exception/SessionRotationException.php)
+- [`src/Exception/SessionAlreadyActiveException.php`](../src/Exception/SessionAlreadyActiveException.php) / [`src/Exception/SessionRotationException.php`](../src/Exception/SessionRotationException.php) / [`src/Exception/SessionDestroyException.php`](../src/Exception/SessionDestroyException.php)
 
 ## Tests
 
 - [`tests/Service/SessionCookieTest.php`](../tests/Service/SessionCookieTest.php) — 属性が start 前に決まる。start 後なら拒否する
 - [`tests/Service/RequestSchemeTest.php`](../tests/Service/RequestSchemeTest.php) — public origin と `$_SERVER['HTTPS']` の組み合わせ表
-- [`tests/Service/NativeAuthSessionTest.php`](../tests/Service/NativeAuthSessionTest.php) — login / logout で id が変わり `clear()` が呼ばれる。回せなければ login が中断する。cookie の無い request では開始しない
+- [`tests/Service/NativeAuthSessionTest.php`](../tests/Service/NativeAuthSessionTest.php) — login で id が変わり `clear()` が呼ばれ、回せなければ中断する。logout で session が無くなり cookie が忘れられ、同じ request で再開しない。破棄に失敗しても user と cookie は既に無い。cookie の無い request では開始しない
 - [`tests/Provider/Auth0ProviderTest.php`](../tests/Provider/Auth0ProviderTest.php) — SDK の cookie にも同じ判定が渡る
 
 ## Key points
@@ -186,7 +210,8 @@ session を開始しないのはその前提を整える側で、どちらの ca
 cookie 属性は `session_start()` を呼ぶ側ではなく `Bootstrap` が最初の start より前に一度決め、
 active な session への設定は例外にする。`Secure` は request ではなく public origin を正とし、
 外部 SDK の cookie にも同じ `RequestScheme` を渡す。`login()` は `session_regenerate_id(true)` と
-`CsrfTokenInterface::clear()` を済ませてから user を書き、`logout()` は user を外してから回す。
+`CsrfTokenInterface::clear()` を済ませてから user を書く。`logout()` は回さずに捨てる — user を外し、
+token を捨て、cookie を失効させて `session_destroy()`。
 cookie を持たない request には session を開始しない。
 
 ## Do not
@@ -195,6 +220,7 @@ cookie を持たない request には session を開始しない。
 - `session_start()` の後に cookie 属性を設定しない — 警告だけで無視され、全 request が成功し続ける。だから `SessionAlreadyActiveException`。
 - request header で `Secure` を決めない — `X-Forwarded-Proto` は誰でも付けられる。TLS 終端の事実は設定（public origin）として持つ。
 - 回転に失敗したまま user を書かない — 旧 id に認証を載せるのは fixation そのもの。`login()` は中断する。
+- logout を回転で済ませない — 空の新 session と新しい cookie が残り、sign out した訪問者の公開 Page で毎回 session が始まる。cookie を失効させて `session_destroy()` する。
 - cookie を持たない訪問者の公開 Page 描画で session を開始しない — 不要な cookie と session file が増え、PHP 既定では応答が `no-store` になる。
 - `Set-Cookie` や PHP 既定の `no-store` を cache 制御の代わりにしない — shared cache を使うなら session cookie 付き request の bypass と、個人向け応答の `private` / `no-store` を明示する。
 
@@ -202,13 +228,14 @@ cookie を持たない request には session を開始しない。
 
 - [ ] `session_get_cookie_params()` が `HttpOnly` / `SameSite=Lax`、public origin が https なら `Secure` — `SessionCookieTest` 相当で green。
 - [ ] active な session に対する `configure()` が例外になる — 同テストで green。
-- [ ] login / logout で session id が変わり CSRF token が `clear()` される。回せなければ login が中断する — `NativeAuthSessionTest` 相当で green。
+- [ ] login で session id が変わり CSRF token が `clear()` される。回せなければ login が中断する — `NativeAuthSessionTest` 相当で green。
+- [ ] logout 後に session が無く、cookie が `$_COOKIE` から消え、同じ request で `currentUser()` が session を再開しない — 同テストで green。
 - [ ] cookie の無い request で `currentUser()` が session を開始しない — 同テストで green。
 - [ ] 外部 SDK の cookie にも同じ `Secure` 判定が渡る — `Auth0ProviderTest` 相当で green。
 
 ## See also
 
-- [`csrf-same-origin-protection`](./csrf-same-origin-protection.md) — この session に住む CSRF token。回転時に `clear()` される側
+- [`csrf-same-origin-protection`](./csrf-same-origin-protection.md) — この session に住む CSRF token。回転と破棄のたびに `clear()` される側
 - [`admin-session-login`](./admin-session-login.md) — `login()` / `logout()` を呼ぶ login → callback → logout の flow
 - [`admin-auth-boundary`](./admin-auth-boundary.md) — `currentUser()` が返す `Visitor` / `AdminUser` を型で検査する側
 - [`auth-oauth-flow`](./auth-oauth-flow.md) — callback が cross-site navigation である理由（`SameSite=Lax` の根拠）

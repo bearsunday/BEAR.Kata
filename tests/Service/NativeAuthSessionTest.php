@@ -9,6 +9,7 @@ use BEAR\Kata\Auth\AdminUser;
 use BEAR\Kata\Auth\AuthenticatedUser;
 use BEAR\Kata\Auth\NativeAuthSession;
 use BEAR\Kata\Auth\Visitor;
+use BEAR\Kata\Exception\SessionDestroyException;
 use BEAR\Kata\Exception\SessionRotationException;
 use Override;
 use PHPUnit\Framework\Attributes\PreserveGlobalState;
@@ -115,18 +116,88 @@ final class NativeAuthSessionTest extends TestCase
         $this->assertSame(7, $user->authorId);
     }
 
+    /** @SuppressWarnings("PHPMD.Superglobals") The cookie is the state under test. */
     #[RunInSeparateProcess]
     #[PreserveGlobalState(false)]
-    public function testLogoutRotatesSessionIdAndClearsToken(): void
+    public function testLogoutDestroysTheSessionAndForgetsTheCookie(): void
     {
         $this->session->login(new AuthenticatedUser(id: 'sub-1', email: 'a@example.com', name: 'A'), 7);
-        $loggedIn = session_id();
+        $_COOKIE[session_name()] = session_id();
 
         $this->session->logout();
 
-        $this->assertNotSame($loggedIn, session_id());
+        $this->assertSame(PHP_SESSION_NONE, session_status());
         $this->assertSame(2, $this->tokenClears);
+        $this->assertArrayNotHasKey(session_name(), $_COOKIE);
+        $this->assertSame([], $_SESSION);
+        // Nothing later in the request restarts a session for the signed-out visitor.
         $this->assertInstanceOf(Visitor::class, $this->session->currentUser());
+        $this->assertSame(PHP_SESSION_NONE, session_status());
+    }
+
+    /**
+     * The handler refuses the second destroy: the first is login's regenerate,
+     * the second is logout. The user and the cookie are already gone by then.
+     *
+     * @SuppressWarnings("PHPMD.Superglobals") The cookie is the state under test.
+     */
+    #[RunInSeparateProcess]
+    #[PreserveGlobalState(false)]
+    public function testLogoutReportsAFailedDestroyAfterForgettingTheUser(): void
+    {
+        session_set_save_handler(new class implements SessionHandlerInterface {
+            private int $destroys = 0;
+
+            #[Override]
+            public function open(string $path, string $name): bool
+            {
+                return true;
+            }
+
+            #[Override]
+            public function close(): bool
+            {
+                return true;
+            }
+
+            #[Override]
+            public function read(string $id): string
+            {
+                return '';
+            }
+
+            #[Override]
+            public function write(string $id, string $data): bool
+            {
+                return true;
+            }
+
+            #[Override]
+            public function destroy(string $id): bool
+            {
+                return ++$this->destroys < 2;
+            }
+
+            #[Override]
+            public function gc(int $maxLifetime): int
+            {
+                return 0;
+            }
+        });
+        $this->session->login(new AuthenticatedUser(id: 'sub-1', email: 'a@example.com', name: 'A'), 7);
+        $_COOKIE[session_name()] = session_id();
+        set_error_handler(static fn (): bool => true); // PHP warns before returning false
+
+        try {
+            $this->session->logout();
+            $this->fail('logout() must report a failed destroy');
+        } catch (SessionDestroyException) {
+            $this->assertSame(2, $this->tokenClears);
+            $this->assertArrayNotHasKey(session_name(), $_COOKIE);
+            $this->assertArrayNotHasKey('cms_user', $_SESSION);
+        } finally {
+            restore_error_handler();
+        }
     }
 
     /**
