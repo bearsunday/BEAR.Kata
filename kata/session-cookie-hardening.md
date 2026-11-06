@@ -140,9 +140,11 @@ private function hasSession(): bool
 の各操作。`bear/csrf` の `SessionCsrfStore` も `csrfField()` の描画と token 検証で開始するので、
 公開 Page に form を置けば匿名訪問者にも session が始まる — 遅延開始は `currentUser()` の性質で
 あって、application 全体の保証ではない。
-shared cache を置くなら、それとは別に session cookie 付き request の cache 読み書きを bypass し、
-個人向け応答には `private` か `no-store` を付ける。cookie 無しで session を開始しないのは
-その前提を整える側で、cache 制御の代わりではない。
+shared HTTP cache を置くなら、それとは別に session cookie 付き request の cache 読み書きを bypass し、
+個人向け応答には `private` か `no-store` を付ける。`#[CacheableResponse]` の application cache は
+HTTP header を見ずに URI で描画済み view を返すので、user 依存の描画を持つ Page には付けない
+（[`csrf-same-origin-protection`](./csrf-same-origin-protection.md) の Do not）。cookie 無しで
+session を開始しないのはその前提を整える側で、どちらの cache 制御の代わりでもない。
 
 ## Naming
 
