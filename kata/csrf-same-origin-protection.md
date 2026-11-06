@@ -84,7 +84,8 @@ field 名を template に直書きしないのは、wire 名を変えたとき�
 ここで守るのは一点だけ — 回転のたびに token も捨てる:
 
 ```php
-// NativeAuthSession::rotate() — login() と logout() の両方から
+// NativeAuthSession::rotate()
+// login() は rotate() してから user を書く。logout() は user を外してから rotate() する。
 if (! session_regenerate_id(true)) {
     throw new SessionRotationException();   // 旧 id のまま先へ進まない
 }

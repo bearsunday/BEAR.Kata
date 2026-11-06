@@ -27,6 +27,8 @@ final class SessionCookieTest extends TestCase
         $this->assertTrue($params['secure']);
         $this->assertSame('Lax', $params['samesite']);
         $this->assertSame('1', ini_get('session.use_strict_mode'));
+        $this->assertSame('1', ini_get('session.use_only_cookies'));
+        $this->assertSame('0', ini_get('session.use_trans_sid'));
     }
 
     #[RunInSeparateProcess]

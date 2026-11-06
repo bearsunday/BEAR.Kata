@@ -34,12 +34,13 @@ use const PHP_SESSION_NONE;
 final class NativeAuthSessionTest extends TestCase
 {
     private NativeAuthSession $session;
+    private CsrfTokenInterface $csrf;
     private int $tokenClears = 0;
 
     #[Override]
     protected function setUp(): void
     {
-        $this->session = new NativeAuthSession(new class ($this->tokenClears) implements CsrfTokenInterface {
+        $this->csrf = new class ($this->tokenClears) implements CsrfTokenInterface {
             public function __construct(private int &$clears)
             {
             }
@@ -61,7 +62,8 @@ final class NativeAuthSessionTest extends TestCase
             {
                 $this->clears++;
             }
-        });
+        };
+        $this->session = new NativeAuthSession($this->csrf);
     }
 
     /** @SuppressWarnings("PHPMD.Superglobals") The cookie is the input under test. */
@@ -73,15 +75,28 @@ final class NativeAuthSessionTest extends TestCase
         $this->assertSame(PHP_SESSION_NONE, session_status());
     }
 
-    /** @SuppressWarnings("PHPMD.Superglobals") The cookie is the input under test. */
+    /**
+     * The cookie is the only thing the next request carries: the session is
+     * closed and the array emptied before currentUser() is asked again.
+     *
+     * @SuppressWarnings("PHPMD.Superglobals") The cookie is the input under test.
+     */
     #[RunInSeparateProcess]
     #[PreserveGlobalState(false)]
-    public function testSessionCookieIsReadBeforeAnsweringVisitor(): void
+    public function testSessionCookieResumesTheStoredUser(): void
     {
-        $_COOKIE[session_name()] = 'carried-over-id';
+        $this->session->login(new AuthenticatedUser(id: 'sub-1', email: 'a@example.com', name: 'A'), 7);
+        $id = session_id();
+        session_write_close();
+        $_SESSION = [];
+        $_COOKIE[session_name()] = $id;
 
-        $this->assertInstanceOf(Visitor::class, $this->session->currentUser());
+        $user = (new NativeAuthSession($this->csrf))->currentUser();
+
         $this->assertSame(PHP_SESSION_ACTIVE, session_status());
+        $this->assertSame($id, session_id());
+        $this->assertInstanceOf(AdminUser::class, $user);
+        $this->assertSame(7, $user->authorId);
     }
 
     #[RunInSeparateProcess]

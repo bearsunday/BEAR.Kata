@@ -4,7 +4,7 @@
 
 - **Category:** Runtime / representation
 - **Status:** `canonical`
-- **Aliases:** session cookie, SessionCookie, session_set_cookie_params, HttpOnly, SameSite, Secure, use_strict_mode, session fixation, session_regenerate_id, RequestScheme, TLS termination, reverse proxy, cookieSecure, セッションクッキー, セッション固定化, セッション再生成, Secure属性
+- **Aliases:** session cookie, SessionCookie, session_set_cookie_params, HttpOnly, SameSite, Secure, use_strict_mode, use_only_cookies, session fixation, session_regenerate_id, RequestScheme, TLS termination, reverse proxy, cookieSecure, lazy session start, session_start, cache_limiter, no-store, セッションクッキー, セッション固定化, セッション再生成, Secure属性, 匿名訪問者, セッション開始
 - **Manual:** https://bearsunday.github.io/manuals/1.0/en/security.html
 - **Use when:** PHP session を使う Page application で、cookie 属性（`HttpOnly` / `SameSite` / `Secure`）を application が決め、ログイン・ログアウトで session id を回したい。
 
@@ -31,6 +31,8 @@ public function configure(array $server, string|null $publicOrigin = null): void
     }
 
     ini_set('session.use_strict_mode', '1');
+    ini_set('session.use_only_cookies', '1');   // id は cookie 以外から受け取らない
+    ini_set('session.use_trans_sid', '0');
     session_set_cookie_params([
         'httponly' => true,
         'samesite' => 'Lax',
@@ -38,6 +40,10 @@ public function configure(array $server, string|null $publicOrigin = null): void
     ]);
 }
 ```
+
+`use_only_cookies` / `use_trans_sid` は PHP 既定で安全側だが、host の ini に委ねない。URL から id を
+受け取る設定が残ると、下の cookie 属性を素通りする経路ができ、「cookie が無ければ session も無い」
+という `currentUser()` の前提も崩れる。
 
 PHP は start 後の cookie 設定を警告だけで無視する。`session.auto_start` の host や早すぎる
 `session_start()` があると、既定の cookie のまま全 request が成功してしまう。
@@ -130,7 +136,10 @@ private function hasSession(): bool
 }
 ```
 
-session を開始するのは state 発行（login の入口）と、cookie を持参した request だけ。
+この adapter が session を開始するのは、cookie を持参した request と、state 発行・login・logout
+の各操作。`bear/csrf` の `SessionCsrfStore` も `csrfField()` の描画と token 検証で開始するので、
+公開 Page に form を置けば匿名訪問者にも session が始まる — 遅延開始は `currentUser()` の性質で
+あって、application 全体の保証ではない。
 shared cache を置くなら、それとは別に session cookie 付き request の cache 読み書きを bypass し、
 個人向け応答には `private` か `no-store` を付ける。cookie 無しで session を開始しないのは
 その前提を整える側で、cache 制御の代わりではない。
