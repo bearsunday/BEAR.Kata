@@ -76,48 +76,28 @@ public function csrfField(): string
 field 名を template に直書きしないのは、wire 名を変えたときに form と interceptor が一緒に
 動くようにするため。token は form が描画されたときだけ発行される。
 
-### session cookie は application が決める
+### token は session に住む
 
-`SessionCsrfStore` も `NativeAuthSession` も、未開始なら素の `session_start()` を呼ぶ。
-どちらが先に走るかは request ごとに変わるので、cookie 属性は呼ぶ側で決めず、
-最初の `session_start()` より前に一度だけ決める:
-
-```php
-// Bootstrap — どの session_start() よりも前
-(new SessionCookie())->configure($server, (string) getenv('CMS_ALLOWED_ORIGIN') ?: null);
-```
-
-session が既に active なら `configure()` は `SessionAlreadyActiveException` を投げる。PHP は
-start 後の cookie 設定を警告だけで無視するので、`session.auto_start` の host や早すぎる
-`session_start()` があると既定の cookie のまま全 request が成功してしまう。黙って成立しない形を
-例外にする。
-
-`SameSite` は `Lax` であって `Strict` ではない。OAuth callback は cross-site の top-level
-navigation で、login state を持つ cookie をそこで受け取る必要がある。
-
-`Secure` は request が HTTPS か、`CMS_ALLOWED_ORIGIN` の scheme が `https` なら付く。proxy が TLS を終端する構成では
-PHP の見る request は plain HTTP で `$_SERVER['HTTPS']` が立たないため、request の scheme だけを
-見ると production の cookie から `Secure` が静かに落ちる。same-origin 門に渡す public origin は
-その事実を既に持っているので、cookie も同じ値から決める。Auth0 SDK 自身の cookie
-(`auth0_session*` / `auth0_transient*`) も、`Auth0Provider` が同じ `RequestScheme` で `cookieSecure` を決める。
-
-### 認証状態が変わったら session id と token を回す
-
-login 前に発行された session id と token を認証後まで持ち越さない。固定化された
-session や漏れた token が、そのまま admin 権限を得る経路になる:
+`SessionCsrfStore` は `$_SESSION` に token を置く。その session の cookie 属性
+(`HttpOnly` / `SameSite` / `Secure`)、login での回転、logout での破棄は
+[`session-cookie-hardening`](./session-cookie-hardening.md) の型で、この kata は扱わない。
+ここで守るのは一点だけ — session が入れ替わるたびに token も捨てる:
 
 ```php
-// NativeAuthSession — login() と logout() の両方
+// NativeAuthSession::rotate() — login() はこれを済ませてから user を書く。
+// logout() は token を clear() してから session ごと destroy() する。
 if (! session_regenerate_id(true)) {
-    throw new SessionRotationException();   // 旧 id のまま user を書かない
+    throw new SessionRotationException();   // 旧 id のまま先へ進まない
 }
 
 $this->csrf->clear();   // 次の issue() が新 session に束縛された token を発行する
 ```
 
-`login()` は回してから user を書く。回せなかったら user を書かずに中断する — 旧 id のまま
-認証を載せるのは、回転が防ぐはずの fixation そのもの。`logout()` は先に user を外してから
-回すので、回せなくても user は残らない。
+回せなかったら `clear()` にも `login()` の user 書き込みにも進まない。失敗チェックを省いた
+写経は、旧 session id と旧 token の上に認証を載せる。
+
+login 前に発行された token を認証後まで持ち越すと、漏れた token がそのまま admin 権限の
+form を通す。token の寿命は session の寿命ではなく、認証状態の寿命に合わせる。
 
 ### 付け忘れを test で塞ぐ
 
@@ -172,7 +152,7 @@ attribute → interceptor → module の対応が名前で追える:
 - [ ] 門を掛けるのは browser が触る Page/Admin であって、CLI や内部requestから到達する App resource ではないと理解したか。
 - [ ] token 門と same-origin 門は独立で、後者は `withSameOriginCheck()` / `withoutSameOriginCheck()` のどちらを呼ぶかで決まると理解したか。prod での欠落は `ProdModule` が boot時に落とす。
 - [ ] attribute の付け忘れは library が検出できない consumer 側の穴で、application が test で塞ぐと理解したか。
-- [ ] session cookie の属性 (`SameSite` / `HttpOnly` / `Secure`) は最初の `session_start()` より前に application が決め、login / logout で session id と token を回すと理解したか。
+- [ ] token は session に住むので、login の回転と logout の破棄で token も `clear()` すると理解したか。cookie 属性・回転・破棄そのものは [`session-cookie-hardening`](./session-cookie-hardening.md)。
 - [ ] 同梱 store が前提とする host (request が process を所有する) を確認したか。
 
 ## Source
@@ -181,13 +161,10 @@ application が所有する部分のみ。library は [`bear/csrf`](https://gith
 
 - [`src/Module/AppModule.php`](../src/Module/AppModule.php) — どちらの門を arm するか
 - [`src/Module/ProdModule.php`](../src/Module/ProdModule.php) — prod の fail-closed
-- [`src/Bootstrap.php`](../src/Bootstrap.php) / [`src/Auth/SessionCookie.php`](../src/Auth/SessionCookie.php) — 最初の `session_start()` より前の cookie 属性
-- [`src/Auth/RequestScheme.php`](../src/Auth/RequestScheme.php) — `Secure` の判定。session cookie と Auth0 SDK の cookie が共有する
 - [`src/Exception/MissingAllowedOriginException.php`](../src/Exception/MissingAllowedOriginException.php)
 - [`src/Renderer/CmsHelpers.php`](../src/Renderer/CmsHelpers.php) / [`src/Module/HtmlModule.php`](../src/Module/HtmlModule.php) — `csrfField()` helper と、QiqModule の `Helpers` をそれに置き換える binding
 - [`src/Resource/Page/Admin/Article.php`](../src/Resource/Page/Admin/Article.php) — attribute の置き場
-- [`src/Auth/NativeAuthSession.php`](../src/Auth/NativeAuthSession.php) — login/logout での session id 再生成と token 破棄
-- [`src/Exception/SessionRotationException.php`](../src/Exception/SessionRotationException.php) / [`src/Exception/SessionAlreadyActiveException.php`](../src/Exception/SessionAlreadyActiveException.php) — 回転と cookie 設定の fail-closed
+- [`src/Auth/NativeAuthSession.php`](../src/Auth/NativeAuthSession.php) — 回転と破棄に同期した token の `clear()`
 
 ## Tests
 
@@ -195,11 +172,8 @@ application が所有する部分のみ。library は [`bear/csrf`](https://gith
 - [`tests/Interceptor/SameOriginWiringTest.php`](../tests/Interceptor/SameOriginWiringTest.php)
 - [`tests/Interceptor/PageCsrfAttributeCoverageTest.php`](../tests/Interceptor/PageCsrfAttributeCoverageTest.php) — 付け忘れ検出
 - [`tests/Interceptor/ProdCsrfBootTest.php`](../tests/Interceptor/ProdCsrfBootTest.php) — origin 未設定で prod が boot に失敗する
-- [`tests/Service/NativeAuthSessionTest.php`](../tests/Service/NativeAuthSessionTest.php) — login / logout で session id が変わり `clear()` が呼ばれる。回せなければ login が中断する
-- [`tests/Service/SessionCookieTest.php`](../tests/Service/SessionCookieTest.php) — cookie 属性が session 開始前に決まる。開始後なら拒否する
-- [`tests/Service/RequestSchemeTest.php`](../tests/Service/RequestSchemeTest.php) — public origin と `$_SERVER['HTTPS']` からの `Secure` 判定
+- [`tests/Service/NativeAuthSessionTest.php`](../tests/Service/NativeAuthSessionTest.php) — login の回転と logout の破棄で `clear()` が呼ばれる
 - [`tests/Renderer/CmsHelpersTest.php`](../tests/Renderer/CmsHelpersTest.php) — helper が bound field 名で描画する。POST form はすべて helper 経由で、手書きの input がない
-- [`tests/Provider/Auth0ProviderTest.php`](../tests/Provider/Auth0ProviderTest.php) — Auth0 SDK の cookie にも同じ判定が渡る
 
 interceptor 単体の挙動 (signal 優先順位、malformed origin、token 比較) は library 側の
 test が持つ。ここで再実装すると、同じ契約の記述が二つになって必ずずれる。
@@ -209,8 +183,8 @@ test が持つ。ここで再実装すると、同じ契約の記述が二つに
 門の位置と網羅が application の責任、仕組みは library の責任。`#[CsrfToken]` / `#[SameOrigin]`
 は browser が触る Page/Admin の unsafe verb にのみ付け、method 引数には token を取らない。
 hidden field は template helper `csrfField()` が `CsrfHiddenInput` から描画し、
-login / logout では `session_regenerate_id(true)` と `CsrfTokenInterface::clear()`。cookie 属性は
-`Bootstrap` が最初の `session_start()` より前に決める。`PageCsrfAttributeCoverageTest` が付け忘れを
+login の回転と logout の破棄に合わせて `CsrfTokenInterface::clear()` する（回転・破棄・cookie 属性は
+[`session-cookie-hardening`](./session-cookie-hardening.md)）。`PageCsrfAttributeCoverageTest` が付け忘れを
 reflection で検出する — library には見えない穴で、ここが application 側で最も効く一手。
 
 ## Do not
@@ -219,17 +193,17 @@ reflection で検出する — library には見えない穴で、ここが appl
 - App resource に門を付けない — CLI・seed・内部requestから到達するので、攻撃ではなく正当な呼び出しを塞ぐ。browser 境界は Page。
 - 設定値の欠落で防御が静かに外れる形にしない — 「検証しない」は `withoutSameOriginCheck()` という**書かなければ起きない**選択として表す。ただし module API がそう書けても composition root が env から導出するなら欠落は防げない。落とすのは `ProdModule` の役割。
 - attribute の付け忘れを library に期待しない — 付いていない method は interceptor の視界に入らない。網羅は application の test で保証する。
-- session cookie を PHP 既定のまま使わない — 既定は `SameSite` 無指定・`HttpOnly` off。`session_start()` を呼ぶ側 (`NativeAuthSession`、`SessionCsrfStore`) は属性を決めず、`Bootstrap` が最初の start より前に決める。
-- 公開 Page を cache するなら token も user も eager に埋めない — renderer は全 template に `issue()` と `currentUser()` の結果を渡す。`#[CacheableResponse]` な公開 Page と同居すると、最初の訪問者の token が cache された HTML で配られる。この kata の form は admin のみで cache しない。公開 form と cache を同居させる consumer は template 側の遅延発行にする。
+- 個人向けに描画した HTML を cache に載せない — token は `csrfField()` が form の中で呼ばれたときだけ `issue()` されるが、layout は admin に logout form を公開 Page でも描くので、この layout を使う Page の描画はすべて user に依存する。`#[CacheableResponse]` は URI を key に描画済み view を保存する application cache で、HTTP の `private` / `no-store` や proxy の bypass では止まらない — 付ければ admin の token 入り HTML が次の訪問者に、匿名の view が admin に配られる。user 依存の描画を持つ Page には付けない。付けるなら session を持つ request を cache の読み書きから外す。shared HTTP cache はそれとは別の層で、session cookie 付き request の bypass と `private` / `no-store` で守る。
+- 認証状態が変わった session に古い token を残さない — 回転と破棄は [`session-cookie-hardening`](./session-cookie-hardening.md) の責任だが、`clear()` を同じ場所で呼ぶのはこの kata の責任。
 - **coroutine hostにそのまま持ち込まない** — 同梱の `SessionCsrfStore` は `$_SESSION` 依存で、Swooleのようにworker内で複数requestが並行する環境ではtokenがworker単位で共有され防御が成立しない([BEAR.Csrf#7](https://github.com/bearsunday/BEAR.Csrf/issues/7)、未解決)。並行hostでは `CsrfTokenInterface` をrequest scopeのstoreに束縛し直す。
 
 ## マスター確認（After）
 
 - [ ] 全 Page write method に attribute が付いていることを coverage test で green。属性を1つ外すと落ちることを確認した。
-- [ ] login / logout で session id が変わり `clear()` が呼ばれることを `NativeAuthSessionTest` で green。cookie は `HttpOnly` / `SameSite=Lax`、public origin が https なら `Secure`。
+- [ ] login の回転と logout の破棄で `clear()` が呼ばれることを `NativeAuthSessionTest` で green。
 - [ ] wiring test が injector 経由で interception の成立を示している。
 - [ ] prod context で `CMS_ALLOWED_ORIGIN` 未設定なら boot に失敗する。
-- [ ] renderer が全 template に token と field 名を供給し、logout で `clear()` される。
+- [ ] POST form はすべて `csrfField()` helper 経由で描画される（`CmsHelpersTest`）。
 
 green が意味するのは「この構成で組み込み側の義務が満たされている」ことであって、
 CSRF 防御そのものの証明ではない。後者は `bear/csrf` の test が持つ。
@@ -239,6 +213,7 @@ CSRF 防御そのものの証明ではない。後者は `bear/csrf` の test �
 - [`admin-prg-form`](./admin-prg-form.md) — この2 attributeが守るAdmin form POST（PRG）
 - [`admin-confirm-page`](./admin-confirm-page.md) — 確認画面のPOSTも同じ2 attributeで保護する
 - [`admin-auth-boundary`](./admin-auth-boundary.md) — 同じAdmin Pageを守るもう一つの境界（認証401 / 認可403）
+- [`session-cookie-hardening`](./session-cookie-hardening.md) — token が住む session の cookie 属性、login での回転、logout での破棄
 - [`admin-session-login`](./admin-session-login.md) — tokenを保持するsessionの確立とlogout
 - [`aop-validation-valid`](./aop-validation-valid.md) — attribute + interceptorでmethodにgateを掛ける同型（validation）
 - [`rate-limit-interceptor`](./rate-limit-interceptor.md) — attribute + interceptorでmethodにgateを掛ける同型（rate limit）
