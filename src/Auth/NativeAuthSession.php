@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace BEAR\Kata\Auth;
 
 use BEAR\Csrf\CsrfTokenInterface;
+use BEAR\Kata\Exception\SessionDestroyException;
 use BEAR\Kata\Exception\SessionRotationException;
 
 use function bin2hex;
@@ -13,9 +14,14 @@ use function is_array;
 use function is_int;
 use function is_string;
 use function random_bytes;
+use function session_destroy;
+use function session_get_cookie_params;
+use function session_name;
 use function session_regenerate_id;
 use function session_start;
 use function session_status;
+use function setcookie;
+use function time;
 
 use const PHP_SESSION_ACTIVE;
 
@@ -31,6 +37,10 @@ final class NativeAuthSession implements AuthSessionInterface
 
     public function currentUser(): UserInterface
     {
+        if (! $this->hasSession()) {
+            return new Visitor();
+        }
+
         $this->start();
         $user = $_SESSION[self::USER] ?? null;
         if (! is_array($user)) {
@@ -79,11 +89,27 @@ final class NativeAuthSession implements AuthSessionInterface
         ];
     }
 
+    /**
+     * Logout leaves nothing behind: no user, no token, no session, no cookie.
+     * Rotating into an empty session instead would hand the browser a new id,
+     * and every later public page would start a session for it again.
+     */
     public function logout(): void
     {
         $this->start();
         unset($_SESSION[self::USER], $_SESSION[self::STATE]);
-        $this->rotate();
+        $this->csrf->clear();
+        $this->destroy();
+    }
+
+    /**
+     * A request without a session cookie has no session to read. Starting one
+     * anyway would hand every anonymous visitor a cookie and a session file, and
+     * PHP's default cache limiter would mark every public page no-store.
+     */
+    private function hasSession(): bool
+    {
+        return session_status() === PHP_SESSION_ACTIVE || isset($_COOKIE[session_name()]);
     }
 
     private function start(): void
@@ -106,6 +132,29 @@ final class NativeAuthSession implements AuthSessionInterface
         }
 
         $this->csrf->clear();
+    }
+
+    /**
+     * The cookie is expired before the server-side destroy, and dropped from
+     * $_COOKIE so nothing later in this request resumes or restarts a session.
+     */
+    private function destroy(): void
+    {
+        $name = session_name();
+        $params = session_get_cookie_params();
+        setcookie($name, '', [
+            'expires' => time() - 3600,
+            'path' => $params['path'],
+            'domain' => $params['domain'],
+            'secure' => $params['secure'],
+            'httponly' => $params['httponly'],
+            'samesite' => $params['samesite'],
+        ]);
+        unset($_COOKIE[$name]);
+        $_SESSION = [];
+        if (! session_destroy()) {
+            throw new SessionDestroyException();
+        }
     }
 
     /** @param array<array-key, mixed> $user */

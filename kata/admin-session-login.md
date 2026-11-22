@@ -116,6 +116,32 @@ public function consumeState(string $state): bool
 }
 ```
 
+### login / logout（session の確立と破棄）
+
+認証状態が変わる 2 箇所は順序が型 — `login()` は session id を回してから user を書く。`logout()` は回さず、user を外し token を捨てて cookie を失効させ、session を破棄する。回転・破棄の中身は [`session-cookie-hardening`](./session-cookie-hardening.md):
+
+```php
+public function login(AuthenticatedUser $user, int $authorId): void
+{
+    $this->start();
+    $this->rotate();
+    $_SESSION[self::USER] = [
+        'id' => $user->id,
+        'email' => $user->email,
+        'name' => $user->name,
+        'authorId' => $authorId,
+    ];
+}
+
+public function logout(): void
+{
+    $this->start();
+    unset($_SESSION[self::USER], $_SESSION[self::STATE]);
+    $this->csrf->clear();
+    $this->destroy();   // cookie 失効 → session_destroy()
+}
+```
+
 ### Identity mapping
 
 恒久キーは `(provider, subject)`。未マッピング時のみemailでauthorを引き、mappingを1回だけ `add` する。unique制約違反（並行ログイン）は既存mappingを読み直して吸収する:
@@ -166,11 +192,11 @@ login / callback / logout は別Page Resourceに分け、URLと1対1にする（
 
 ## 着手前チェック（Before）
 
-- [ ] login（state発行→302）/ callback（state検証→token交換→session確立）/ logout（user を外して session id を回す）を別Page Resourceに分けると決めたか。
+- [ ] login（state発行→302）/ callback（state検証→token交換→session確立）/ logout（user を外し、cookie を失効させて session を破棄する）を別Page Resourceに分けると決めたか。
 - [ ] CSRF/replay対策として `issueState()` → `consumeState()`（one-time消費 + `hash_equals` 比較）のstate検証を入れると決めたか。
 - [ ] 外部identityを `(provider, subject) → authorId` でマッピングし、emailは初回ログインのfallbackのみと理解したか。
 - [ ] logoutはGETでなくPOST（`#[SameOrigin]` + `#[CsrfToken]`）にすると決めたか。
-- [ ] login / logout で `session_regenerate_id(true)` と CSRF token の `clear()` を行う（session fixation 対策）と理解したか。
+- [ ] `login()` は session id を回してから user を書き、`logout()` は回さずに session と cookie を捨てる（中身は [`session-cookie-hardening`](./session-cookie-hardening.md)）と理解したか。
 
 ## Source
 
@@ -184,11 +210,11 @@ login / callback / logout は別Page Resourceに分け、URLと1対1にする（
 
 - [`tests/Resource/Page/Admin/LoginTest.php`](../tests/Resource/Page/Admin/LoginTest.php)
 - [`tests/Service/AuthorIdentityResolverTest.php`](../tests/Service/AuthorIdentityResolverTest.php)
-- [`tests/Service/NativeAuthSessionTest.php`](../tests/Service/NativeAuthSessionTest.php) — login / logout での session id 再生成と token 破棄
+- [`tests/Service/NativeAuthSessionTest.php`](../tests/Service/NativeAuthSessionTest.php) — login での session id 再生成、logout での session 破棄と cookie 失効、両方での token 破棄
 
 ## Key points
 
-Loginは `issueState()` → 302（authorization URL）。Callbackはstate検証失敗/認証失敗で401（provider内部を漏らさない）、author未解決は403、成功で `session->login()` → 303 `/admin/index`。identity mappingは初回のみ `auth_identity_add` され、同一subjectの再ログインで重複作成しない。LogoutはGET=405、POST=303。`login()` / `logout()` はどちらも `session_regenerate_id(true)` と CSRF token の `clear()` を行い、認証前の session id と token を持ち越さない。
+Loginは `issueState()` → 302（authorization URL）。Callbackはstate検証失敗/認証失敗で401（provider内部を漏らさない）、author未解決は403、成功で `session->login()` → 303 `/admin/index`。identity mappingは初回のみ `auth_identity_add` され、同一subjectの再ログインで重複作成しない。LogoutはGET=405、POST=303。`login()` は `session_regenerate_id(true)` と CSRF token の `clear()` を済ませてから user を書き、`logout()` は token を `clear()` して cookie を失効させ `session_destroy()` する — 認証前の id と token を持ち越さず、sign out 後に cookie も残さない。
 
 ## Do not
 
@@ -204,6 +230,7 @@ Loginは `issueState()` → 302（authorization URL）。Callbackはstate検証�
 - [`admin-auth-boundary`](./admin-auth-boundary.md) — 確立したsessionを型付きユーザー境界で検査する側
 - [`auth-oauth-flow`](./auth-oauth-flow.md) — OAuth認証フローをResourceで示す（App側）
 - [`csrf-same-origin-protection`](./csrf-same-origin-protection.md) — logout POSTを守る `#[SameOrigin]` + `#[CsrfToken]` のbind
+- [`session-cookie-hardening`](./session-cookie-hardening.md) — この flow が確立する session の cookie 属性、`login()` の回転、`logout()` の破棄
 - [`admin-prg-form`](./admin-prg-form.md) — POST → 303 リダイレクトのPRG（admin form側）
 - [`db-read-by-natural-key`](./db-read-by-natural-key.md) — `byProviderSubject` / `byEmail` の自然キー読み
 - [`page-resource-test`](./page-resource-test.md) — Page Resourceのテストの型（`LoginTest` の土台）

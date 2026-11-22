@@ -113,6 +113,7 @@ BEAR.Kata の各エントリは「Kata（型）」です。武道の型と同じ
 | セッションログイン（login→callback→logout） | [`admin-session-login`](kata/admin-session-login.md) | showcase |
 | 認証境界（401）とauthor-scoped認可（403）を分ける | [`admin-auth-boundary`](kata/admin-auth-boundary.md) | showcase |
 | write操作をCSRF/Same-Originで保護する | [`csrf-same-origin-protection`](kata/csrf-same-origin-protection.md) | canonical |
+| session cookie の属性を決め、login / logout で session を回す | [`session-cookie-hardening`](kata/session-cookie-hardening.md) | canonical |
 | ログイン試行をレート制限する（429） | [`rate-limit-interceptor`](kata/rate-limit-interceptor.md) | external |
 | ロール/権限でリソース単位の認可をする | [`resource-permission-authorization`](kata/resource-permission-authorization.md) | external |
 | 有効期限付き署名URLで検証リンクを作る | [`signed-url-verification`](kata/signed-url-verification.md) | external |

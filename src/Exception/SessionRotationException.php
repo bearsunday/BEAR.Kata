@@ -9,9 +9,9 @@ use RuntimeException;
 /**
  * The session id could not be regenerated on an authentication change.
  *
- * On login this aborts before the user is stored, because keeping the pre-login id is
- * exactly the fixation the rotation exists to prevent. On logout the user entry is already
- * removed by then; only the id rotation and the token reset are lost.
+ * Raised from login, before the user is stored: keeping the pre-login id is exactly the
+ * fixation the rotation exists to prevent. Logout does not rotate; it destroys the session
+ * and reports its own failure as {@see SessionDestroyException}.
  */
 final class SessionRotationException extends RuntimeException
 {
