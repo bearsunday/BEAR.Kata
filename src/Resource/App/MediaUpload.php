@@ -28,7 +28,7 @@ use function random_bytes;
 use function rtrim;
 use function unlink;
 
-#[Alps('MediaUpload')]
+#[Alps('Media')]
 class MediaUpload extends ResourceObject
 {
     private const int MAX_UPLOAD_BYTES = 5_242_880;

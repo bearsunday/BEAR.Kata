@@ -38,6 +38,9 @@
     <testsuite name="service">
       <directory>tests/Service</directory>
     </testsuite>
+    <testsuite name="alps">
+      <directory>tests/Alps</directory>
+    </testsuite>
   </testsuites>
   <source>
     <include>
